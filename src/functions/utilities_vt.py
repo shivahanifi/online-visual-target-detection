@@ -4,7 +4,27 @@ import math
 import cv2
 import tensorflow as tf
 
-#Keypoint extraction
+# gpu selection
+def init_gpus(num_gpu, num_gpu_start):
+    gpus = tf.config.experimental.list_physical_devices('GPU')
+    if gpus:
+        try:
+            if num_gpu > 0:
+                for gpu in gpus:
+                    tf.config.experimental.set_memory_growth(gpu, True)
+                tf.config.experimental.set_visible_devices(gpus[num_gpu_start:num_gpu_start+num_gpu], 'GPU')
+                print(len(gpus), "Physical GPUs found, Set visible devices: ", tf.config.experimental.get_visible_devices('GPU'))
+            else:
+                tf.config.experimental.set_visible_devices([], 'GPU')
+                print("GPU has been disable!!!")
+        except RuntimeError as e:
+            # Visible devices must be set before GPUs have been initialized
+            print(e)
+    else:
+        print("No physical GPU found")
+
+
+# Keypoint extraction
 def read_openpose_from_json(json_filename):
 
     with open(json_filename) as data_file:
