@@ -34,7 +34,8 @@ class VisualTargetDetection(yarp.RFModule):
         self.in_buf_human_image.setExternal(self.in_buf_human_array.data, self.in_buf_human_array.shape[1],
                                             self.in_buf_human_array.shape[0])
         print('{:s} opened'.format('/vtd/image:i'))
-        ort and buffer for depth
+        
+        # Port and buffer for depth
         self.in_port_human_depth = yarp.BufferedPortImageFloat()
         self.in_port_human_depth.open('/vtd/depth:i')
         self.in_buf_human_depth_array = np.ones((IMAGE_HEIGHT, IMAGE_WIDTH, 1), dtype=np.float32)
@@ -137,5 +138,5 @@ if __name__ == '__main__':
     rf = yarp.ResourceFinder()
     
     # Run module
-    manager = FaceRecogniser()
-    manager.runModule(rf)
+    manager = VisualTargetDetection()
+    manager.configure(rf)
