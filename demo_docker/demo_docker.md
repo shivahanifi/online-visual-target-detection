@@ -4,6 +4,7 @@
   - [The Errors](#the-errors)
   - [Final Solution](#final-solution)
   - [How to build the docker?](#how-to-build-the-docker)
+  - [How to run the docker?](#how-to-run-the-docker)
 
 
 
@@ -30,3 +31,25 @@ The final solution was to build a docker starting from ubuntu 18 with python 3.6
   Since nvidia-docker was not installed and the docker environment was not able to see the GPU first I run it only on CPU to test (To do so remove the `.cuda()` whereever you see it in the demo.py code).
 
 ## How to build the docker?
+
+To build the docker head to the direction where you have your docker file and use the command below:
+```
+sudo docker build --build-arg "START_IMG=nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04" --build-arg "release=master" --build-arg "sbtag=Unstable" -t visual_target_attention .
+```
+Here we are using `sudo` since there was an accessibility error when trying to build w/o sudo. Using the `--build-arg` we are setting build-time variables, i.e. specify the image it should start from. Also the tag name for this docker is specified as `visual_target_attention`. The docker file that it is getting built is included in the folder under the name [Dockerfile]().
+
+## How to run the docker?
+Before running the docker you should do:
+```
+xhost +
+```
+It adds host names on the list of machines from which the X Server accepts connections. This command must be run from the machine with the display connection. This permits the root user on the local machine to connect to X windows display. In case you do not run this, you will face this error:
+
+<img src="../demo_docker/xhost_error.png" alt="Xhost error" width="300"/>
+
+After that you can run the docker:
+
+```
+sudo nvidia-docker run --rm -it --privileged --gpus all  --privileged -v /dev:/dev -e QT_X11_NO_MITSHM=1 -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --hostname dockerpc --network=host --pid=host visual_target_attention bash
+
+```
