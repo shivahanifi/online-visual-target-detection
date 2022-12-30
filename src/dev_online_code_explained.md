@@ -11,7 +11,8 @@
 
 
 ## Imports
-1. 
+   1. `yarp`: Needed to initialize the yarp network, define ports, and generally to use YARP.
+   2. `numpy`: When defineing ports you need to create a Numpy array to wrap the YARP image.                                     
 ## Class Definition
 This code is in OOP style, which helps it to be more organized and deals with objects. To that end a class `VisualTargetDetection` is defined. `yarp.RFModule` is used as an input for the class.
 
@@ -45,7 +46,18 @@ It takes `rf` as a parameter as a previously initialized ResourceFinder which is
     This function is defined in the `utilities_vt.py` file, thus you need to import it inorder to use it. (Note: the main definition is from [face-recogniser-realsense.py](https://github.com/MariaLombardi/face-recogniser-demo/blob/main/src/face-recogniser-realsense.py))
   
   ###   Ports
-  For each port we will consider two parts, defining the port and preparing the related buffer which needs to be done only once (That's why we are using it in the `config` method). To better understand read [yarpImage](https://github.dev/robotology/yarp/blob/master/bindings/python/examples/yarpImage.py) and [Handling YARP images in Python](https://robotology.github.io/robotology-documentation/doc/html/icub_python_imaging.html).
+  - Which ports are need?
+    
+    Considering the roadmap, ports needed are as follows: 
+    
+    ![Roadmap](Img/roadmap.jpg)
+1. Input Image port and buffer (Depth is not used in this code and it does not need a port)
+2. Input port for openpose data
+3. Output port for bboxes
+4. Output port for ropagating input image
+5. Output port for the selection
+
+  For ports related to the images we will consider two parts, defining the port and preparing the related buffer which needs to be done only once (That's why we are using it in the `config` method). To better understand read [yarpImage](https://github.dev/robotology/yarp/blob/master/bindings/python/examples/yarpImage.py) and [Handling YARP images in Python](https://robotology.github.io/robotology-documentation/doc/html/icub_python_imaging.html).
   
   1. Input port for rgb image
   ```

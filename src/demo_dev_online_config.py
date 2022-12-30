@@ -35,15 +35,6 @@ class VisualTargetDetection(yarp.RFModule):
                                             self.in_buf_human_array.shape[0])
         print('{:s} opened'.format('/vtd/image:i'))
         
-        # Port and buffer for depth
-        self.in_port_human_depth = yarp.BufferedPortImageFloat()
-        self.in_port_human_depth.open('/vtd/depth:i')
-        self.in_buf_human_depth_array = np.ones((IMAGE_HEIGHT, IMAGE_WIDTH, 1), dtype=np.float32)
-        self.in_buf_human_depth = yarp.ImageFloat()
-        self.in_buf_human_depth.resize(IMAGE_WIDTH, IMAGE_HEIGHT)
-        self.in_buf_human_depth.setExternal(self.in_buf_human_depth_array.data, self.in_buf_human_depth_array.shape[1],
-                                            self.in_buf_human_depth_array.shape[0])
-        print('{:s} opened'.format('/vtd/depth:i'))
         
         # Input port for openpose data
         self.in_port_human_data = yarp.BufferedPortBottle()
@@ -70,25 +61,10 @@ class VisualTargetDetection(yarp.RFModule):
                                              self.out_buf_propag_image_array.shape[0])
         print('{:s} opened'.format('/vtd/propag:o'))
 
-        # Propag input depth
-        self.out_port_propag_depth = yarp.Port()
-        self.out_port_propag_depth.open('/vtd/depth:o')
-        self.out_buf_propag_depth_array = np.ones((IMAGE_HEIGHT, IMAGE_WIDTH, 1), dtype=np.float32)
-        self.out_buf_propag_depth = yarp.ImageFloat()
-        self.out_buf_propag_depth.resize(IMAGE_WIDTH, IMAGE_HEIGHT)
-        self.out_buf_propag_depth.setExternal(self.out_buf_propag_depth_array.data, self.out_buf_propag_depth_array.shape[1],
-                                              self.out_buf_propag_depth_array.shape[0])
-        print('{:s} opened'.format('/vtd/depth:o'))
-
         # Output port for the selection
         self.out_port_prediction = yarp.Port()
         self.out_port_prediction.open('/vtd/pred:o')
         print('{:s} opened'.format('/vtd/pred:o'))
-
-        # Output for the logger for the state machine
-        self.out_port_state = yarp.Port()
-        self.out_port_state.open('/vtd/state:o')
-        print('{:s} opened'.format('/vtd/state:o'))
         
         self.human_image = np.ones((IMAGE_HEIGHT, IMAGE_WIDTH, 3), dtype=np.uint8)
 
@@ -120,11 +96,9 @@ class VisualTargetDetection(yarp.RFModule):
     def interruptModule(self):
         print('Interrupt function')
         self.in_port_human_image.close()
-        self.in_port_human_depth.close()
         self.in_port_human_data.close()
         self.out_port_human_image.close()
         self.out_port_propag_image.close()
-        self.out_port_propag_depth.close()
         self.out_port_prediction.close()
         self.out_port_state.close()
         self.cmd_port.close()
@@ -133,6 +107,9 @@ class VisualTargetDetection(yarp.RFModule):
     # Desired period between successive calls to updateModule()
     def getPeriod(self):
         return 0.001
+    
+    # Update module
+    def updateModule(self):
 
 if __name__ == '__main__':
     rf = yarp.ResourceFinder()
