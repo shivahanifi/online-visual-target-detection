@@ -262,14 +262,15 @@ class VisualTargetDetection(yarp.RFModule):
                                 plt.savefig('/home/r1-user/code_sh/new_new/attention-target-detection/data/demo/offLine_output/fig{0}.png'.format(i))
 
                             print('DONE!')
-
+                except:
+                    pass
+                              
 
 if __name__ == '__main__':
     rf = yarp.ResourceFinder()
     rf.setVerbose(True)
     rf.setDefaultContext("VisualTargetDetection")
-    #rf.setDefaultConfigFile('../app/config/.ini')
-
+    rf.setDefaultConfigFile('../app/config/.ini')
     rf.configure(sys.argv)
 
     # Run module
