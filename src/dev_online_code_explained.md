@@ -1,5 +1,4 @@
 ## Table of Contents
-- [Table of Contents](#table-of-contents)
 - [Imports](#imports)
 - [Class Definition](#class-definition)
 - [`configure` Method](#configure-method)
@@ -9,7 +8,7 @@
 - [interruptModule Method](#interruptmodule-method)
 - [getPeriod Method](#getperiod-method)
 - [updateModule Method](#updatemodule-method)
-
+- [Errors](#errors)
 
 ## Imports
    1. `yarp`: Needed to initialize the yarp network, define ports, and generally to use YARP.
@@ -111,3 +110,8 @@ It contains the part of the code that will iterate. Here we include all the step
 1.  The images recieved from the YARP ports are wrapped in a numpy array format but the code needs them in a PIL format. A transformation should be applied in this sense.
 2. Dataframe structure can still remain eventhough we are using one image at a time and there is no need for sorting them in a dataframe, but to save the initial structure it stays and everytime it will use the index 0 of the dataframe.
 3. 
+
+## Errors
+  1.  [IndentationError: unexpected unindent](https://techwithtech.com/indentationerror-unexpected-unindent/)
+
+      It occured because of the try-except structure. In the update module there is a try, which should have an except pair. Adding the except in the proper place with proper syntax solved the error.

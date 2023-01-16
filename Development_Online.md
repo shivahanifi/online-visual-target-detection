@@ -5,10 +5,7 @@
   - [Code Modification](#code-modification)
     - [Structure](#structure)
     - [YARP Involved](#yarp-involved)
-    - [Object Oriented Programming](#object-oriented-programming)
-    - [`configure` function](#configure-function)
-    - 
-  
+  - [Test w/ Dumped Data](#test-w-dumped-data)
   
 
 ## Road Map
@@ -48,4 +45,9 @@ Up to this point in the project, in order to run the demo, the environment provi
 2. With the msi laptop I installed robotology-superbuild successfully on the other environment but [attention-target-detection](https://github.com/ejcgt/attention-target-detection)'s environment was not able to detect it. I was recieving an error related to GlibC
 
 3. Build robotology-superbuild while in the environment
-  
+
+## Test w/ Dumped Data
+Inorder to use the previously dumped data, yarp datapalyer will be used. It will play the data as if they are streaming from a camera. Inside the docker, there was an error related to QT libraries which caused problems when trying to open a yarpview and visualize the data. To overcome this issue we are using the yarpview and the yarpdataplayer from the yarp installed on the localhost. An [application XML file](https://github.com/shivahanifi/online-visual-target-detection/blob/main/app/scripts/vtd_app.xml) is created such that connects the code inside the docker with the dataplayer and the yarpview on the localhost (we are treating them as two different machines running on the same nameserver).
+
+To test the data run the code inside the docker, and the application from the yarpmanager. Connecting all the modules will provide us with the result we are expecting. (The code must be running ofcourse:) )
+- Note: when running the dataplayer, first load one of the sequences of the dumped data (from file), then in our case we do not need depth and disable it. Finally, before playing, choose repeating from options so that it will continuosly play the data.
