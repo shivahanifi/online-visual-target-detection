@@ -15,6 +15,7 @@ import math
 import glob
 import yarp
 import PIL
+import sys
 from scipy.misc import imresize
 from model import ModelSpatial
 from utils import imutils, evaluation

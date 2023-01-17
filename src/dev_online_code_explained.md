@@ -115,3 +115,18 @@ It contains the part of the code that will iterate. Here we include all the step
   1.  [IndentationError: unexpected unindent](https://techwithtech.com/indentationerror-unexpected-unindent/)
 
       It occured because of the try-except structure. In the update module there is a try, which should have an except pair. Adding the except in the proper place with proper syntax solved the error.
+  
+  2.  `ImportError: No module named 'lib'`
+
+      It is relate dto the `from lib.pytorch_convolutional_rnn import convolutional_rnn`, There is a folder named `lib` which contains [pytorch_convolutional_rnn](https://github.com/ejcgt/attention-target-detection/tree/master/lib/pytorch_convolutional_rnn). It is a module created by the authors of the original code. The reason for recieving this error was the new structur of files where I have classified them into the `src` and `app`. However, the folder containong the lib was not inside the `src` where the main code is, therefore, it was not able to find it.
+      - Note: I moved all the python related codes and folders inside the `src` to avoid any further errors.
+
+  3. `ImportError: No module named 'tensorflow'`
+      
+      Tensorflow is not installed inside the environment since the main code is not using it. I have used it in the `utilities_vt.py` to define the functions I need. To solve this error install it inside the environment. 
+      ```
+      pip install tensorflow
+      ``` 
+  4. `NameError: name 'sys' is not defined`
+
+    It is related to the `rf.configure(sys.argv)`
