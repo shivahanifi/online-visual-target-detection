@@ -129,4 +129,4 @@ It contains the part of the code that will iterate. Here we include all the step
       ``` 
   4. `NameError: name 'sys' is not defined`
 
-    It is related to the `rf.configure(sys.argv)`
+      It is related to the `rf.configure(sys.argv)`, The error is because I have forgotten to import sys. This module provides access to some variables used or maintained by the interpreter and to functions that interact strongly with the interpreter. It is always available.
