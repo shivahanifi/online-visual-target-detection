@@ -19,12 +19,6 @@
 
 	<module>
 		<name>yarpview</name>
-		<parameters>--name /view/skeleton --w 640 --h 480</parameters>
-		<node>localhost</node>
-	</module>
-
-	<module>
-		<name>yarpview</name>
 		<parameters>--name /view/bbox --w 640 --h 480</parameters>
 		<node>localhost</node>
 	</module>
@@ -53,11 +47,12 @@
 		<protocol>tcp</protocol>
 	</connection>
 
+
     <!-- visualize bbox -->
 	<connection>
 		<from>/vtd/image:o</from>
 		<to>/view/bbox</to>
-		<protocol>tcp</protocol>
+		<protocol>mjpeg</protocol>
 	</connection>
 
 </application>
