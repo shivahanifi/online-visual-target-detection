@@ -117,10 +117,9 @@ class VisualTargetDetection(yarp.RFModule):
         self.out_port_propag_image.close()
         self.out_port_propag_depth.close()
         self.out_port_prediction.close()
-        self.out_port_state.close()
         self.cmd_port.close()
         return True
-    
+
     # Called after a quit command (Does nothing)
     def interruptModule(self):
         print('Interrupt function')
@@ -129,7 +128,6 @@ class VisualTargetDetection(yarp.RFModule):
         self.out_port_human_image.close()
         self.out_port_propag_image.close()
         self.out_port_prediction.close()
-        self.out_port_state.close()
         self.cmd_port.close()
         return True
 
@@ -139,27 +137,11 @@ class VisualTargetDetection(yarp.RFModule):
 
 
     def updateModule(self):
-
-        #listOfJson = sorted(glob.glob(JSON_FILES + '/*.json'))
-        #json_log = logging.debug(listOfJson)
-
-        #extracting image names
-        # idx = []
-        # for b in listOfJson:
-        #     txt = b.split('/')
-        #     txt1 = txt[6].split('_')
-        #     txt2 = txt1[0] + '.jpg'
-        #     idx.append(txt2)
-        
-        
+            
         # Convert the numpy array to a PIL image
-        received_image = PIL.Image.fromarray(self.in_port_human_image.read())
+        received_image = PIL.Image.fromarray(self.in_buf_human_image.read())
 
         if received_image:
-            self.in_buf_human_image.copy(received_image)
-            human_image = np.copy(self.in_buf_human_array)
-            self.human_image = np.copy(human_image)
-
             received_data = self.in_port_human_data.read()
             if received_data:
                 try:
@@ -228,8 +210,6 @@ class VisualTargetDetection(yarp.RFModule):
                                 inout = (1 - inout) * 255
                                 norm_map = imresize(raw_hm, (height, width)) - inout
 
-                                #logging.debug(norm_map)
-
                                 # vis
                                 plt.close()
                                 plt.rcParams["figure.figsize"] = [20.00,20.00]
@@ -264,7 +244,7 @@ class VisualTargetDetection(yarp.RFModule):
 
                             print('DONE!')
                 except:
-                    pass
+                    print("An error occured")
                               
 
 if __name__ == '__main__':
