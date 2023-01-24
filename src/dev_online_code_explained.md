@@ -1,5 +1,4 @@
 ## Table of Contents
-- [Imports](#imports)
 - [Class Definition](#class-definition)
 - [`configure` Method](#configure-method)
   - [gpu](#gpu)
@@ -9,10 +8,8 @@
 - [getPeriod Method](#getperiod-method)
 - [updateModule Method](#updatemodule-method)
 - [Errors](#errors)
-
-## Imports
-   1. `yarp`: Needed to initialize the yarp network, define ports, and generally to use YARP.
-   2. `numpy`: When defineing ports you need to create a Numpy array to wrap the YARP image.                                     
+- [Test Simplified Versions](#test-simplified-versions)
+                                   
 ## Class Definition
 This code is in OOP style, which helps it to be more organized and deals with objects. To that end a class `VisualTargetDetection` is defined. `yarp.RFModule` is used as an input for the class.
 
@@ -130,3 +127,23 @@ It contains the part of the code that will iterate. Here we include all the step
   4. `NameError: name 'sys' is not defined`
 
       It is related to the `rf.configure(sys.argv)`, The error is because I have forgotten to import sys. This module provides access to some variables used or maintained by the interpreter and to functions that interact strongly with the interpreter. It is always available.
+
+## Test Simplified Versions
+1. Copy input into output
+
+    This is a simple test just to see if we can successfully send the input image to the output port without any change and visualize it. To do so, comment eveerything in the `updateModule` and only keep:
+
+    ```
+      received_image = self.in_port_human_image.read()
+      self.in_buf_human_image.copy(received_image)
+      assert self.in_buf_human_array.__array_interface__['data'][0] == self.in_buf_human_image.getRawImage().__int__()
+      pil_image = PIL.Image.fromarray(self.in_buf_human_array)
+
+      self.out_buf_human_array[:, :] = self.in_buf_human_array
+      self.out_port_human_image.write(self.out_buf_human_image)
+    ```
+
+    Running this code ended up with visualizing only one frame of the input data in the output view. The `updateModule` should run continuously and not once. Therefore, the problem here should be that it cannot end the first execution and get to the other frames. Adding `return True` at the end of the `updateModule` solved the problem. The result was displaying the same frames both in the input and output.
+      ![test](Img/test.png)
+
+2. Visualize only the boundingbox
