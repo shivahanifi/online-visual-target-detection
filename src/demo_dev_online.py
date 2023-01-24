@@ -18,6 +18,7 @@ import PIL
 import sys
 import io
 from PIL import Image
+from PIL import ImageShow
 from scipy.misc import imresize
 from model import ModelSpatial
 from utils import imutils, evaluation
@@ -161,14 +162,8 @@ class VisualTargetDetection(yarp.RFModule):
         pil_image = Image.fromarray(self.in_buf_human_array)
         
         # Visualizing the input image
-        plt.rcParams["figure.figsize"] = [IMAGE_HEIGHT, IMAGE_WIDTH]
-        plt.rcParams["figure.autolayout"] = True
-        plt.figure() # open a new figure
-        img_buf = io.BytesIO(pil_image)
-        im = Image.open(img_buf)
-        im.show(title="My Image")
-        img_buf.close()
-
+        ImageShow.show(pil_image)
+        
         # self.out_buf_human_array[:, :] = self.in_buf_human_array
         # self.out_port_human_image.write(self.out_buf_human_image)
 
