@@ -153,7 +153,7 @@ class VisualTargetDetection(yarp.RFModule):
     def updateModule(self):
     
         received_image = self.in_port_human_image.read()
-        self.in_buf_human_image.copy(received_image)
+        self.in_buf_human_image.copy(received_image,IMAGE_HEIGHT, IMAGE_WIDTH)
         assert self.in_buf_human_array.__array_interface__['data'][0] == self.in_buf_human_image.getRawImage().__int__()
         # Convert the numpy array to a PIL image
         pil_image = PIL.Image.fromarray(self.in_buf_human_array)
@@ -184,11 +184,11 @@ class VisualTargetDetection(yarp.RFModule):
 
         #                 #logging.debug(df)
         #                 # set up data transformation
-                        test_transforms = _get_transform()
+                        test_transforms = get_transform()
 
                         model = ModelSpatial()
                         model_dict = model.state_dict()
-                        pretrained_dict = torch.load(args.model_weights)
+                        pretrained_dict = torch.load(self.args.model_weights)
                         pretrained_dict = pretrained_dict['model']
                         model_dict.update(pretrained_dict)
                         model.load_state_dict(model_dict)
@@ -222,12 +222,12 @@ class VisualTargetDetection(yarp.RFModule):
                                 #logging.debug(inout)
 
                                 # heatmap modulation
-                                raw_hm = raw_hm.cpu().detach().numpy() * 255
-                                raw_hm = raw_hm.squeeze()
-                                inout = inout.cpu().detach().numpy()
-                                inout = 1 / (1 + np.exp(-inout))
-                                inout = (1 - inout) * 255
-                                norm_map = imresize(raw_hm, (height, width)) - inout
+                                # raw_hm = raw_hm.cpu().detach().numpy() * 255
+                                # raw_hm = raw_hm.squeeze()
+                                # inout = inout.cpu().detach().numpy()
+                                # inout = 1 / (1 + np.exp(-inout))
+                                # inout = (1 - inout) * 255
+                                # norm_map = imresize(raw_hm, (height, width)) - inout
 
                                 # vis
                                 plt.close()
@@ -258,8 +258,7 @@ class VisualTargetDetection(yarp.RFModule):
         #                             plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
 
                                 plt.show(block=False)
-                                self.out_port_human_image.write(self.out_buf_human_image)
-                                #self.out_port_human_image.write(fig_final)
+                                self.out_port_human_image.write(plt.show(block=False))
                                 plt.pause(1)
         #                         plt.savefig('/home/r1-user/code_sh/new_new/attention-target-detection/data/demo/offLine_output/fig{0}.png'.format(i))
 

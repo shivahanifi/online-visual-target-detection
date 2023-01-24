@@ -28,6 +28,40 @@ def read_openpose_from_json(json_filename):
     return poses, conf_poses, faces, conf_faces
 
 
+def read_openpose_data(received_data):
+    body = []
+    face = []
+    if received_data:
+        received_data = received_data.get(0).asList()
+        for i in range(0, received_data.size()):
+            keypoints = received_data.get(i).asList()
+
+            if keypoints:
+                body_person = []
+                face_person = []
+                for y in range(0, keypoints.size()):
+                    part = keypoints.get(y).asList()
+                    if part:
+                        if part.get(0).asString() == "Face":
+                            for z in range(1, part.size()):
+                                item = part.get(z).asList()
+                                face_part = [item.get(0).asFloat64(), item.get(1).asFloat64(), item.get(2).asFloat64()]
+                                face_person.append(face_part)
+                        else:
+                            body_part = [part.get(1).asFloat64(), part.get(2).asFloat64(), part.get(3).asFloat64()]
+                            body_person.append(body_part)
+
+                if body_person:
+                    body.append(body_person)
+                if face_person:
+                    face.append(face_person)
+
+    poses, conf_poses = load_many_poses(body)
+    faces, conf_faces = load_many_faces(face)
+
+    return poses, conf_poses, faces, conf_faces
+
+
 def compute_centroid(points):
     mean_x = np.mean([p[0] for p in points])
     mean_y = np.mean([p[1] for p in points])
@@ -95,7 +129,7 @@ def init_gpus(num_gpu, num_gpu_start):
         print("No physical GPU found")
 
 # Transforming images
-def _get_transform():
+def get_transform():
     transform_list = []
     transform_list.append(transforms.Resize((input_resolution, input_resolution)))
     transform_list.append(transforms.ToTensor())
