@@ -158,7 +158,8 @@ class VisualTargetDetection(yarp.RFModule):
         assert self.in_buf_human_array.__array_interface__['data'][0] == self.in_buf_human_image.getRawImage().__int__()
         # Convert the numpy array to a PIL image
         pil_image = Image.fromarray(self.in_buf_human_array)
-        Image.open(pil_image)
+        with Image.open(pil_image) as img:
+            img.load()
 
         # self.out_buf_human_array[:, :] = self.in_buf_human_array
         # self.out_port_human_image.write(self.out_buf_human_image)
