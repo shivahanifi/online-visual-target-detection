@@ -16,6 +16,7 @@ import glob
 import yarp
 import PIL
 import sys
+import io
 from PIL import Image
 from scipy.misc import imresize
 from model import ModelSpatial
@@ -158,8 +159,15 @@ class VisualTargetDetection(yarp.RFModule):
         assert self.in_buf_human_array.__array_interface__['data'][0] == self.in_buf_human_image.getRawImage().__int__()
         # Convert the numpy array to a PIL image
         pil_image = Image.fromarray(self.in_buf_human_array)
-        with Image.open(pil_image) as img:
-            img.load()
+        
+        # Visualizing the input image
+        plt.rcParams["figure.figsize"] = [IMAGE_HEIGHT, IMAGE_WIDTH]
+        plt.rcParams["figure.autolayout"] = True
+        plt.figure() # open a new figure
+        img_buf = io.BytesIO(pil_image)
+        im = Image.open(img_buf)
+        im.show(title="My Image")
+        img_buf.close()
 
         # self.out_buf_human_array[:, :] = self.in_buf_human_array
         # self.out_port_human_image.write(self.out_buf_human_image)
