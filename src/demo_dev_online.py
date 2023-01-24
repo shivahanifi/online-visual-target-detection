@@ -139,112 +139,119 @@ class VisualTargetDetection(yarp.RFModule):
     def updateModule(self):
             
         # Convert the numpy array to a PIL image
-        received_image = PIL.Image.fromarray(self.in_buf_human_image.read())
-
-        if received_image:
-            received_data = self.in_port_human_data.read()
-            if received_data:
-                try:
-                    poses, conf_poses, faces, conf_faces = read_openpose_data(received_data)
-                
-                    if poses:
-                        min_x, min_y, max_x, max_y = get_openpose_bbox(poses)
-
-                        column_names = ['left', 'top', 'right', 'bottom']
-                        line_to_write = [[min_x, min_y, max_x, max_y]]
-                        df = pd.DataFrame(line_to_write, columns=column_names)
     
-                        df['left'] -= (df['right']-df['left'])*0.1
-                        df['right'] += (df['right']-df['left'])*0.1
-                        df['top'] -= (df['bottom']-df['top'])*0.1
-                        df['bottom'] += (df['bottom']-df['top'])*0.1
+        received_image = self.in_port_human_image.read()
+        self.in_buf_human_image.copy(received_image)
+        assert self.in_buf_human_array.__array_interface__['data'][0] == self.in_buf_human_image.getRawImage().__int__()
+        pil_image = PIL.Image.fromarray(self.in_buf_human_array)
+
+        self.out_buf_human_array[:, :] = self.in_buf_human_array
+        self.out_port_human_image.write(self.out_buf_human_image)
+
+        # if pil_image:
+        #     received_data = self.in_port_human_data.read()
+        #     if received_data:
+        #         try:
+        #             poses, conf_poses, faces, conf_faces = read_openpose_data(received_data)
+                
+        #             if poses:
+        #                 min_x, min_y, max_x, max_y = get_openpose_bbox(poses)
+
+        #                 column_names = ['left', 'top', 'right', 'bottom']
+        #                 line_to_write = [[min_x, min_y, max_x, max_y]]
+        #                 df = pd.DataFrame(line_to_write, columns=column_names)
+    
+        #                 df['left'] -= (df['right']-df['left'])*0.1
+        #                 df['right'] += (df['right']-df['left'])*0.1
+        #                 df['top'] -= (df['bottom']-df['top'])*0.1
+        #                 df['bottom'] += (df['bottom']-df['top'])*0.1
 
 
-                        #logging.debug(df)
-                        # set up data transformation
-                        test_transforms = _get_transform()
+        #                 #logging.debug(df)
+        #                 # set up data transformation
+        #                 test_transforms = _get_transform()
 
-                        model = ModelSpatial()
-                        model_dict = model.state_dict()
-                        pretrained_dict = torch.load(args.model_weights)
-                        pretrained_dict = pretrained_dict['model']
-                        model_dict.update(pretrained_dict)
-                        model.load_state_dict(model_dict)
+        #                 model = ModelSpatial()
+        #                 model_dict = model.state_dict()
+        #                 pretrained_dict = torch.load(args.model_weights)
+        #                 pretrained_dict = pretrained_dict['model']
+        #                 model_dict.update(pretrained_dict)
+        #                 model.load_state_dict(model_dict)
 
-                        model.cuda()
-                        model.train(False)
+        #                 model.cuda()
+        #                 model.train(False)
 
-                        with torch.no_grad():
-                            for i in df.index:
-                                frame_raw = PIL.Image.fromarray(self.in_port_human_image.read())
+        #                 with torch.no_grad():
+        #                     for i in df.index:
+        #                         frame_raw = PIL.Image.fromarray(self.in_port_human_image.read())
                             
-                                width, height = frame_raw.size
+        #                         width, height = frame_raw.size
 
-                                #logging.debug(width)
-                                #logging.debug(height)
+        #                         #logging.debug(width)
+        #                         #logging.debug(height)
 
-                                head_box = [df.loc[i,'left'], df.loc[i,'top'], df.loc[i,'right'], df.loc[i,'bottom']]
+        #                         head_box = [df.loc[i,'left'], df.loc[i,'top'], df.loc[i,'right'], df.loc[i,'bottom']]
 
-                                head = frame_raw.crop((head_box)) # head crop
+        #                         head = frame_raw.crop((head_box)) # head crop
 
-                                head = test_transforms(head) # transform inputs
-                                frame = test_transforms(frame_raw)
-                                head_channel = imutils.get_head_box_channel(head_box[0], head_box[1], head_box[2], head_box[3], width, height,
-                                                                            resolution=input_resolution).unsqueeze(0)
+        #                         head = test_transforms(head) # transform inputs
+        #                         frame = test_transforms(frame_raw)
+        #                         head_channel = imutils.get_head_box_channel(head_box[0], head_box[1], head_box[2], head_box[3], width, height,
+        #                                                                     resolution=input_resolution).unsqueeze(0)
 
-                                head = head.unsqueeze(0).cuda()
-                                frame = frame.unsqueeze(0).cuda()
-                                head_channel = head_channel.unsqueeze(0).cuda()
+        #                         head = head.unsqueeze(0).cuda()
+        #                         frame = frame.unsqueeze(0).cuda()
+        #                         head_channel = head_channel.unsqueeze(0).cuda()
 
-                                # forward pass
-                                raw_hm, _, inout = model(frame, head_channel, head)
+        #                         # forward pass
+        #                         raw_hm, _, inout = model(frame, head_channel, head)
 
-                                #logging.debug(raw_hm)
-                                #logging.debug(inout)
+        #                         #logging.debug(raw_hm)
+        #                         #logging.debug(inout)
 
-                                # heatmap modulation
-                                raw_hm = raw_hm.cpu().detach().numpy() * 255
-                                raw_hm = raw_hm.squeeze()
-                                inout = inout.cpu().detach().numpy()
-                                inout = 1 / (1 + np.exp(-inout))
-                                inout = (1 - inout) * 255
-                                norm_map = imresize(raw_hm, (height, width)) - inout
+        #                         # heatmap modulation
+        #                         raw_hm = raw_hm.cpu().detach().numpy() * 255
+        #                         raw_hm = raw_hm.squeeze()
+        #                         inout = inout.cpu().detach().numpy()
+        #                         inout = 1 / (1 + np.exp(-inout))
+        #                         inout = (1 - inout) * 255
+        #                         norm_map = imresize(raw_hm, (height, width)) - inout
 
-                                # vis
-                                plt.close()
-                                plt.rcParams["figure.figsize"] = [20.00,20.00]
-                                fig = plt.figure()
-                                fig.canvas.manager.window.move(0,0)
-                                plt.axis('off')
-                                plt.imshow(frame_raw)
+        #                         # vis
+        #                         plt.close()
+        #                         plt.rcParams["figure.figsize"] = [20.00,20.00]
+        #                         fig = plt.figure()
+        #                         fig.canvas.manager.window.move(0,0)
+        #                         plt.axis('off')
+        #                         plt.imshow(frame_raw)
 
-                                ax = plt.gca()
-                                rect = patches.Rectangle((head_box[0], head_box[1]), head_box[2]-head_box[0], head_box[3]-head_box[1], linewidth=2, edgecolor=(0,1,0), facecolor='none')
-                                ax.add_patch(rect)
+        #                         ax = plt.gca()
+        #                         rect = patches.Rectangle((head_box[0], head_box[1]), head_box[2]-head_box[0], head_box[3]-head_box[1], linewidth=2, edgecolor=(0,1,0), facecolor='none')
+        #                         ax.add_patch(rect)
 
-                                if self.args.vis_mode == 'arrow':
-                                    if inout < args.out_threshold: # in-frame gaze
-                                        pred_x, pred_y = evaluation.argmax_pts(raw_hm)
-                                        norm_p = [pred_x/output_resolution, pred_y/output_resolution]
-                                        circ = patches.Circle((norm_p[0]*width, norm_p[1]*height), height/50.0, facecolor=(0,1,0), edgecolor='none')
-                                        ax.add_patch(circ)
-                                        plt.plot((norm_p[0]*width,(head_box[0]+head_box[2])/2), (norm_p[1]*height,(head_box[1]+head_box[3])/2), '-', color=(0,1,0,1))
+        #                         if self.args.vis_mode == 'arrow':
+        #                             if inout < self.args.out_threshold: # in-frame gaze
+        #                                 pred_x, pred_y = evaluation.argmax_pts(raw_hm)
+        #                                 norm_p = [pred_x/output_resolution, pred_y/output_resolution]
+        #                                 circ = patches.Circle((norm_p[0]*width, norm_p[1]*height), height/50.0, facecolor=(0,1,0), edgecolor='none')
+        #                                 ax.add_patch(circ)
+        #                                 plt.plot((norm_p[0]*width,(head_box[0]+head_box[2])/2), (norm_p[1]*height,(head_box[1]+head_box[3])/2), '-', color=(0,1,0,1))
 
-                                        #logging.debug(args.vis_mode)
-                                        #logging.debug(inout)
-                                        #logging.debug(args.out_threshold)
-                                        #logging.debug(norm_p)
+        #                                 #logging.debug(args.vis_mode)
+        #                                 #logging.debug(inout)
+        #                                 #logging.debug(args.out_threshold)
+        #                                 #logging.debug(norm_p)
 
-                                else:
-                                    plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
+        #                         else:
+        #                             plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
 
-                                plt.show(block=False)
-                                plt.pause(1)
-                                plt.savefig('/home/r1-user/code_sh/new_new/attention-target-detection/data/demo/offLine_output/fig{0}.png'.format(i))
+        #                         plt.show(block=False)
+        #                         plt.pause(1)
+        #                         plt.savefig('/home/r1-user/code_sh/new_new/attention-target-detection/data/demo/offLine_output/fig{0}.png'.format(i))
 
-                            print('DONE!')
-                except:
-                    print("An error occured")
+        #                     print('DONE!')
+        #         except:
+        #             print("An error occured")
                               
 
 if __name__ == '__main__':
