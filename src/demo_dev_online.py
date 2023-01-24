@@ -158,22 +158,19 @@ class VisualTargetDetection(yarp.RFModule):
         received_image = self.in_port_human_image.read()
         self.in_buf_human_image.copy(received_image)
         assert self.in_buf_human_array.__array_interface__['data'][0] == self.in_buf_human_image.getRawImage().__int__()
+
         # Convert the numpy array to a PIL image
         pil_image = Image.fromarray(self.in_buf_human_array)
         
-        # Visualizing the input image
-        ImageShow.show(pil_image)
-
-        # self.out_buf_human_array[:, :] = self.in_buf_human_array
-        # self.out_port_human_image.write(self.out_buf_human_image)
-
-        # return True
+       
+        # To check the input
+        #pil_image.save('/projects/test_images/pil_image.png')
 
         if pil_image:
             received_data = self.in_port_human_data.read()
             if received_data:
                 try:
-                    poses, conf_poses, faces, conf_faces = read_openpose_from_json(received_data)
+                    poses, conf_poses, faces, conf_faces = read_openpose_data(received_data)
                 
                     if poses:
                         min_x, min_y, max_x, max_y = get_openpose_bbox(poses)
@@ -272,6 +269,9 @@ class VisualTargetDetection(yarp.RFModule):
                                 self.out_port_human_image.write(yarp_image)
                                 plt.pause(1)
         #                         plt.savefig('/home/r1-user/code_sh/new_new/attention-target-detection/data/demo/offLine_output/fig{0}.png'.format(i))
+
+                                        # self.out_buf_human_array[:, :] = self.in_buf_human_array
+                                        # self.out_port_human_image.write(self.out_buf_human_image)
 
                                 print('DONE!')
                 except:
