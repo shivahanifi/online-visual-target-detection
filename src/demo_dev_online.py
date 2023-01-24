@@ -163,7 +163,7 @@ class VisualTargetDetection(yarp.RFModule):
         
         # Visualizing the input image
         ImageShow.show(pil_image)
-        
+
         # self.out_buf_human_array[:, :] = self.in_buf_human_array
         # self.out_port_human_image.write(self.out_buf_human_image)
 
@@ -263,8 +263,9 @@ class VisualTargetDetection(yarp.RFModule):
         #                         else:
         #                             plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
 
-                                
-                                img_array = np.asarray(plt.show(block=False))
+                                plt.savefig('bbox.png', dpi=300)
+                                plt.show(block=False)
+                                img_array = np.asarray('bbox.png')
                                 yarp_image = yarp.ImageFloat()
                                 yarp_image.setExternal(img_array, img_array.shape[1], img_array.shape[0])
                                 self.out_port_human_image.write(yarp_image)
