@@ -16,6 +16,7 @@ import glob
 import yarp
 import PIL
 import sys
+from PIL import Image
 from scipy.misc import imresize
 from model import ModelSpatial
 from utils import imutils, evaluation
@@ -156,8 +157,8 @@ class VisualTargetDetection(yarp.RFModule):
         self.in_buf_human_image.copy(received_image)
         assert self.in_buf_human_array.__array_interface__['data'][0] == self.in_buf_human_image.getRawImage().__int__()
         # Convert the numpy array to a PIL image
-        pil_image = PIL.Image.fromarray(self.in_buf_human_array)
-        PIL.Image.show(pil_image)
+        pil_image = Image.fromarray(self.in_buf_human_array)
+        Image.open(pil_image)
 
         # self.out_buf_human_array[:, :] = self.in_buf_human_array
         # self.out_port_human_image.write(self.out_buf_human_image)
@@ -258,8 +259,11 @@ class VisualTargetDetection(yarp.RFModule):
         #                         else:
         #                             plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
 
-                                plt.show(block=False)
-                                self.out_port_human_image.write(plt.show(block=False))
+                                
+                                img_array = np.asarray(plt.show(block=False))
+                                yarp_image = yarp.ImageFloat()
+                                yarp_image.setExternal(img_array, img_array.shape[1], img_array.shape[0])
+                                self.out_port_human_image.write(yarp_image)
                                 plt.pause(1)
         #                         plt.savefig('/home/r1-user/code_sh/new_new/attention-target-detection/data/demo/offLine_output/fig{0}.png'.format(i))
 
