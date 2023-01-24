@@ -257,8 +257,9 @@ class VisualTargetDetection(yarp.RFModule):
         #                         else:
         #                             plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
 
-                                fig_final = plt.show(block=False)
-                                self.out_port_human_image.write(fig_final)
+                                plt.show(block=False)
+                                self.out_port_human_image.write(self.out_buf_human_image)
+                                #self.out_port_human_image.write(fig_final)
                                 plt.pause(1)
         #                         plt.savefig('/home/r1-user/code_sh/new_new/attention-target-detection/data/demo/offLine_output/fig{0}.png'.format(i))
 
