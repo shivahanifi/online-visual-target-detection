@@ -247,7 +247,7 @@ class VisualTargetDetection(yarp.RFModule):
                                 # vis
 
                                 # Draw the raw_frame and the bbox
-                                img_bbox = cv2.rectangle(np.asarray(frame_raw),(head_box[0], head_box[1]),(head_box[2], head_box[3]), (0, 255, 0))
+                                img_bbox = cv2.rectangle(np.asarray(frame_raw),(int(head_box[0]), int(head_box[1])),(int(head_box[2]), int(head_box[3])), (0, 255, 0))
                                 cv2.imwrite('/projects/test_images/img_bbox.png')
                                 cv2.imshow(img_bbox)
                                 cv2.waitKey(0)
