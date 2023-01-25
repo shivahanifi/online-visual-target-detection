@@ -293,8 +293,9 @@ class VisualTargetDetection(yarp.RFModule):
                                 print('DONE!')
                     else:
                         print('Could not get the poses')
-                except:
+                except Exception as err:
                     print("An error occured while extracting the poses from OpenPose data")
+                    print("Unexpected error!!! " + str(err))
             else:
                 print('No data from OpenPose recieved')
         else:

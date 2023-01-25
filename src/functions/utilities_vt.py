@@ -5,6 +5,7 @@ import cv2
 import tensorflow as tf
 import json
 import yarp
+from config_vt import *
 
 
 # Keypoint extraction
@@ -36,6 +37,7 @@ def read_openpose_data(received_data):
     if received_data:
         received_data = received_data.get(0).asList()
         for i in range(0, received_data.size()):
+            print("size: " + received_data.size())
             keypoints = received_data.get(i).asList()
 
             if keypoints:
@@ -89,7 +91,7 @@ def load_many_faces(data):
         faces.append(np.array(person)[:, 0:2])
         confidences.append(np.array(person)[:, 2])
 
-    return faces, 
+    return faces, confidences
 
 
 def compute_centroid(points):
@@ -158,10 +160,3 @@ def init_gpus(num_gpu, num_gpu_start):
     else:
         print("No physical GPU found")
 
-# Transforming images
-def get_transform():
-    transform_list = []
-    transform_list.append(transforms.Resize((input_resolution, input_resolution)))
-    transform_list.append(transforms.ToTensor())
-    transform_list.append(transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]))
-    return transforms.Compose(transform_list)

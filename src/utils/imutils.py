@@ -2,7 +2,8 @@ from __future__ import absolute_import
 import torch
 import numpy as np
 from .misc import *
-
+from config import *
+from torchvision import datasets, transforms
 
 def unnorm(img, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):
     std = np.array(std).reshape(3,1,1)
@@ -74,3 +75,11 @@ def multi_hot_targets(gaze_pts, out_res):
             y = min(y, h-1)
             target_map[y, x] = 1
     return target_map
+
+# Transforming images
+def get_transform():
+    transform_list = []
+    transform_list.append(transforms.Resize((input_resolution, input_resolution)))
+    transform_list.append(transforms.ToTensor())
+    transform_list.append(transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]))
+    return transforms.Compose(transform_list)
