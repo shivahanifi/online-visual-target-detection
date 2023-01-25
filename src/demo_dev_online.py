@@ -94,7 +94,7 @@ class VisualTargetDetection(yarp.RFModule):
 
         # To get argumennts needed
         parser = argparse.ArgumentParser()
-        parser.add_argument('--model_weights', type=str, help='model weights', default='model_demo.pt')
+        parser.add_argument('--model_weights', type=str, help='model weights', default='/projects/online-visual-target-detection/model_demo.pt')
         #parser.add_argument('--image_dir', type=str, help='images', default=FRAMES_DIR)
         #parser.add_argument('--head_dir', type=str, help='head bounding boxes', default=JSON_FILES)
         parser.add_argument('--vis_mode', type=str, help='heatmap or arrow', default='heatmap')
@@ -247,7 +247,7 @@ class VisualTargetDetection(yarp.RFModule):
                                 # vis
 
                                 # Draw the raw_frame and the bbox
-                                img_bbox = cv2.rectangle(frame_raw,(head_box[0], head_box[1]),(head_box[2], head_box[3]), (0, 255, 0))
+                                img_bbox = cv2.rectangle(np.asarray(frame_raw),(head_box[0], head_box[1]),(head_box[2], head_box[3]), (0, 255, 0))
                                 cv2.imwrite('/projects/test_images/img_bbox.png')
                                 cv2.imshow(img_bbox)
                                 cv2.waitKey(0)
