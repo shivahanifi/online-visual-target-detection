@@ -168,12 +168,15 @@ class VisualTargetDetection(yarp.RFModule):
         #pil_image.save('/projects/test_images/pil_image.png')
 
         if pil_image:
+            print('Input image recieved')
             received_data = self.in_port_human_data.read()
             if received_data:
+                print('Input data recieved')
                 try:
                     poses, conf_poses, faces, conf_faces = read_openpose_data(received_data)
                 
                     if poses:
+                        print('poses extracted')
                         min_x, min_y, max_x, max_y = get_openpose_bbox(poses)
 
                         column_names = ['left', 'top', 'right', 'bottom']
