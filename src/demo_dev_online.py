@@ -251,8 +251,8 @@ class VisualTargetDetection(yarp.RFModule):
                                 end_point = (int(head_box[2]), int(head_box[3]))
                                 img_bbox = cv2.rectangle(np.asarray(frame_raw),start_point,end_point, (0, 255, 0),2)
                                 cv2.imwrite('/projects/test_images/img_bbox.png', img_bbox)
-                                cv2.imshow('bbox', img_bbox)
-                                cv2.waitKey(0)
+                                #cv2.imshow('bbox', img_bbox)
+                                #cv2.waitKey(0)
                             
 
                                 img_bbox_array = np.asarray(img_bbox)
