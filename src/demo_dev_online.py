@@ -188,6 +188,15 @@ class VisualTargetDetection(yarp.RFModule):
                         df['bottom'] += (df['bottom']-df['top'])*0.1
 
 
+                        # Transforming images
+                        def get_transform():
+                            transform_list = []
+                            transform_list.append(transforms.Resize((input_resolution, input_resolution)))
+                            transform_list.append(transforms.ToTensor())
+                            transform_list.append(transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]))
+                            return transforms.Compose(transform_list)
+
+
                          #logging.debug(df)
                          # set up data transformation
                         test_transforms = get_transform()
