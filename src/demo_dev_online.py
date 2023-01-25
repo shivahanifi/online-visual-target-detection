@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import cv2
 import json
 import math
 import glob
@@ -233,16 +234,28 @@ class VisualTargetDetection(yarp.RFModule):
                                 # norm_map = imresize(raw_hm, (height, width)) - inout
 
                                 # vis
-                                plt.close()
-                                plt.rcParams["figure.figsize"] = [20.00,20.00]
-                                fig = plt.figure()
-                                fig.canvas.manager.window.move(0,0)
-                                plt.axis('off')
-                                plt.imshow(frame_raw)
 
-                                ax = plt.gca()
-                                rect = patches.Rectangle((head_box[0], head_box[1]), head_box[2]-head_box[0], head_box[3]-head_box[1], linewidth=2, edgecolor=(0,1,0), facecolor='none')
-                                ax.add_patch(rect)
+                                # Draw the raw_frame and the bbox
+                                img_bbox = cv2.rectangle(frame_raw,(head_box[0], head_box[1]),(head_box[2], head_box[3]), (0, 255, 0) )
+                                cv2.imshow(img_bbox)
+                                cv2.waitKey(0)
+
+                                img_bbox_array = np.asarray(img_bbox)
+                                self.out_buf_human_array[:, :] = img_bbox_array
+                                self.out_port_human_image.write(self.out_buf_human_image)
+
+
+
+                                # plt.close()
+                                # plt.rcParams["figure.figsize"] = [20.00,20.00]
+                                # fig = plt.figure()
+                                # fig.canvas.manager.window.move(0,0)
+                                # plt.axis('off')
+                                # plt.imshow(frame_raw)
+
+                                # ax = plt.gca()
+                                # rect = patches.Rectangle((head_box[0], head_box[1]), head_box[2]-head_box[0], head_box[3]-head_box[1], linewidth=2, edgecolor=(0,1,0), facecolor='none')
+                                # ax.add_patch(rect)
 
         #                         if self.args.vis_mode == 'arrow':
         #                             if inout < self.args.out_threshold: # in-frame gaze
@@ -262,12 +275,12 @@ class VisualTargetDetection(yarp.RFModule):
 
                                 #plt.savefig('bbox.png', dpi=300)
                                 #plt.show(block=False)
-                                fig.canvas.draw()
-                                img_array = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.unit8)
-                                yarp_image = yarp.ImageFloat()
-                                yarp_image.setExternal(img_array, img_array.shape[1], img_array.shape[0])
-                                self.out_port_human_image.write(yarp_image)
-                                plt.pause(1)
+                                # fig.canvas.draw()
+                                # img_array = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.unit8)
+                                # yarp_image = yarp.ImageFloat()
+                                # yarp_image.setExternal(img_array, img_array.shape[1], img_array.shape[0])
+                                # self.out_port_human_image.write(yarp_image)
+                                # plt.pause(1)
         #                         plt.savefig('/home/r1-user/code_sh/new_new/attention-target-detection/data/demo/offLine_output/fig{0}.png'.format(i))
 
                                         # self.out_buf_human_array[:, :] = self.in_buf_human_array
