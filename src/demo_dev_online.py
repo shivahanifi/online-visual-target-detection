@@ -168,10 +168,8 @@ class VisualTargetDetection(yarp.RFModule):
         #pil_image.save('/projects/test_images/pil_image.png')
 
         if pil_image:
-            print('Input image recieved')
             received_data = self.in_port_human_data.read()
             if received_data:
-                print('Input data recieved')
                 try:
                     poses, conf_poses, faces, conf_faces = read_openpose_data(received_data)
                 
@@ -295,11 +293,11 @@ class VisualTargetDetection(yarp.RFModule):
                     else:
                         print('Could not get the poses')
                 except:
-                    print("An error occured")
+                    print("An error occured while extracting the poses from OpenPose data")
             else:
-                print('No data recieved')
+                print('No data from OpenPose recieved')
         else:
-            print('No input image')                      
+            print('No input images recieved')                      
 
 if __name__ == '__main__':
     rf = yarp.ResourceFinder()

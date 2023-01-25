@@ -62,6 +62,28 @@ def read_openpose_data(received_data):
     return poses, conf_poses, faces, conf_faces
 
 
+def load_many_poses(data):
+    poses = []
+    confidences = []
+
+    for person in data:
+        poses.append(np.array(person)[:, 0:2])
+        confidences.append(np.array(person)[:, 2])
+
+    return poses, confidences
+
+
+def load_many_faces(data):
+    faces = []
+    confidences = []
+
+    for person in data:
+        faces.append(np.array(person)[:, 0:2])
+        confidences.append(np.array(person)[:, 2])
+
+    return faces, 
+
+
 def compute_centroid(points):
     mean_x = np.mean([p[0] for p in points])
     mean_y = np.mean([p[1] for p in points])
