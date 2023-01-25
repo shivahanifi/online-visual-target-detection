@@ -186,8 +186,8 @@ class VisualTargetDetection(yarp.RFModule):
                         df['bottom'] += (df['bottom']-df['top'])*0.1
 
 
-        #                 #logging.debug(df)
-        #                 # set up data transformation
+                         #logging.debug(df)
+                         # set up data transformation
                         test_transforms = get_transform()
 
                         model = ModelSpatial()
@@ -236,9 +236,11 @@ class VisualTargetDetection(yarp.RFModule):
                                 # vis
 
                                 # Draw the raw_frame and the bbox
-                                img_bbox = cv2.rectangle(frame_raw,(head_box[0], head_box[1]),(head_box[2], head_box[3]), (0, 255, 0) )
+                                img_bbox = cv2.rectangle(frame_raw,(head_box[0], head_box[1]),(head_box[2], head_box[3]), (0, 255, 0))
+                                cv2.imwrite('/projects/test_images/img_bbox.png')
                                 cv2.imshow(img_bbox)
                                 cv2.waitKey(0)
+                            
 
                                 img_bbox_array = np.asarray(img_bbox)
                                 self.out_buf_human_array[:, :] = img_bbox_array
@@ -287,9 +289,14 @@ class VisualTargetDetection(yarp.RFModule):
                                         # self.out_port_human_image.write(self.out_buf_human_image)
 
                                 print('DONE!')
+                    else:
+                        print('Could not get the poses')
                 except:
                     print("An error occured")
-                              
+            else:
+                print('No data recieved')
+        else:
+            print('No input image')                      
 
 if __name__ == '__main__':
     rf = yarp.ResourceFinder()
