@@ -170,6 +170,7 @@ class VisualTargetDetection(yarp.RFModule):
         if pil_image:
             received_data = self.in_port_human_data.read()
             if received_data:
+                print(received_data)
                 try:
                     poses, conf_poses, faces, conf_faces = read_openpose_data(received_data)
                 
