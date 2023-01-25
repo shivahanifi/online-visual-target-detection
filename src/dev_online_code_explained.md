@@ -147,3 +147,119 @@ It contains the part of the code that will iterate. Here we include all the step
       ![test](Img/test.png)
 
 2. Visualize only the boundingbox
+
+    With the second test the aim is to draw the head bounding boxes for the dumped data.
+    The dumped input images propagated through yarpOpenPose, for the sake of synchronicity, in the port `/yarpOpenPose/propag:o` will be given as input to the code at the port `/vtd/image:i`. On the other hand, the dumped OpenPose data which is in the port `/yarpOpenPose/target:o` will be fed to the code through the port `/vtd/data:i`. Considering the main code from the [attention-target-detection](https://github.com/ejcgt/attention-target-detection/blob/master/demo.py), there are changes that have been applied. The main change regards the visualization part. In the source demo code they are usig `matplotlib` which makes the code a bit confusing, here I have replaced it with openCV functions. A sample frame from the results is presented.
+
+      ![test_bbox](Img/test_bbox.png)
+
+    - Note 1: There were plenty of errors, but all of them were related to the minor details of code such as syntax, typo, etc. The one that is worth highlighting was relatd to adding `return True` at the end of the module so that it will repeat the procedure for all the input images.
+
+    - Note 2: The same application XML file was used, no need for any changes.
+
+    - Note 3: The results were being displayed with a bit of a lag with respect to the inputs, which is due to the GPU. With an external GPU the problem will be solved.
+    
+    - Note 3: If you want to repeat this step, replace the `updateModule` with the code below.
+
+    ```
+        def updateModule(self):
+    
+        received_image = self.in_port_human_image.read()
+        self.in_buf_human_image.copy(received_image)
+        assert self.in_buf_human_array.__array_interface__['data'][0] == self.in_buf_human_image.getRawImage().__int__()
+
+        # Convert the numpy array to a PIL image
+        pil_image = Image.fromarray(self.in_buf_human_array)
+        
+       
+        # To check the input
+        #pil_image.save('/projects/test_images/pil_image.png')
+
+        if pil_image:
+            received_data = self.in_port_human_data.read()
+            if received_data:
+                try:
+                    poses, conf_poses, faces, conf_faces = read_openpose_data(received_data)
+                
+                    if poses:
+                        min_x, min_y, max_x, max_y = get_openpose_bbox(poses)
+
+                        column_names = ['left', 'top', 'right', 'bottom']
+                        line_to_write = [[min_x, min_y, max_x, max_y]]
+                        df = pd.DataFrame(line_to_write, columns=column_names)
+    
+                        df['left'] -= (df['right']-df['left'])*0.1
+                        df['right'] += (df['right']-df['left'])*0.1
+                        df['top'] -= (df['bottom']-df['top'])*0.1
+                        df['bottom'] += (df['bottom']-df['top'])*0.1
+
+
+                        # Transforming images
+                        def get_transform():
+                            transform_list = []
+                            transform_list.append(transforms.Resize((input_resolution, input_resolution)))
+                            transform_list.append(transforms.ToTensor())
+                            transform_list.append(transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]))
+                            return transforms.Compose(transform_list)
+
+
+                         #logging.debug(df)
+                         # set up data transformation
+                        test_transforms = get_transform()
+
+                        model = ModelSpatial()
+                        model_dict = model.state_dict()
+                        pretrained_dict = torch.load(self.args.model_weights)
+                        pretrained_dict = pretrained_dict['model']
+                        model_dict.update(pretrained_dict)
+                        model.load_state_dict(model_dict)
+
+                        model.cuda()
+                        model.train(False)
+
+                        with torch.no_grad():
+                            for i in df.index:
+                                frame_raw = pil_image
+                            
+                                width, height = frame_raw.size
+
+                                head_box = [df.loc[i,'left'], df.loc[i,'top'], df.loc[i,'right'], df.loc[i,'bottom']]
+
+                                head = frame_raw.crop((head_box)) # head crop
+
+                                head = test_transforms(head) # transform inputs
+                                frame = test_transforms(frame_raw)
+                                head_channel = imutils.get_head_box_channel(head_box[0], head_box[1], head_box[2], head_box[3], width, height,
+                                                                            resolution=input_resolution).unsqueeze(0)
+
+                                head = head.unsqueeze(0).cuda()
+                                frame = frame.unsqueeze(0).cuda()
+                                head_channel = head_channel.unsqueeze(0).cuda()
+
+                                # forward pass
+                                raw_hm, _, inout = model(frame, head_channel, head)
+
+                                # Draw the raw_frame and the bbox
+                                start_point = (int(head_box[0]), int(head_box[1]))
+                                end_point = (int(head_box[2]), int(head_box[3]))
+                                img_bbox = cv2.rectangle(np.asarray(frame_raw),start_point,end_point, (0, 255, 0),2)
+                                cv2.imwrite('/projects/test_images/img_bbox.png', img_bbox)
+                                #cv2.imshow('bbox', img_bbox)
+                                #cv2.waitKey(0)
+                            
+
+                                img_bbox_array = np.asarray(img_bbox)
+                                self.out_buf_human_array[:, :] = img_bbox_array
+                                self.out_port_human_image.write(self.out_buf_human_image)
+                    else:
+                        print('Could not get the poses')
+                except Exception as err:
+                    print("An error occured while extracting the poses from OpenPose data")
+                    print("Unexpected error!!! " + str(err))
+            else:
+                print('No data from OpenPose recieved')
+        else:
+            print('No input images recieved')    
+
+        return True   
+    ```

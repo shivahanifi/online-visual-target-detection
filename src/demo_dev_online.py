@@ -170,12 +170,10 @@ class VisualTargetDetection(yarp.RFModule):
         if pil_image:
             received_data = self.in_port_human_data.read()
             if received_data:
-                print(received_data)
                 try:
                     poses, conf_poses, faces, conf_faces = read_openpose_data(received_data)
                 
                     if poses:
-                        print('poses extracted')
                         min_x, min_y, max_x, max_y = get_openpose_bbox(poses)
 
                         column_names = ['left', 'top', 'right', 'bottom']
@@ -300,8 +298,6 @@ class VisualTargetDetection(yarp.RFModule):
 
                                         # self.out_buf_human_array[:, :] = self.in_buf_human_array
                                         # self.out_port_human_image.write(self.out_buf_human_image)
-
-                                print('DONE!')
                     else:
                         print('Could not get the poses')
                 except Exception as err:
