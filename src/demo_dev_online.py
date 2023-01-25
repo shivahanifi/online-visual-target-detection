@@ -310,7 +310,9 @@ class VisualTargetDetection(yarp.RFModule):
             else:
                 print('No data from OpenPose recieved')
         else:
-            print('No input images recieved')                      
+            print('No input images recieved')    
+
+        return True                  
 
 if __name__ == '__main__':
     rf = yarp.ResourceFinder()
