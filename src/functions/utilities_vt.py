@@ -5,7 +5,7 @@ import cv2
 import tensorflow as tf
 import json
 import yarp
-from config_vt import *
+from functions.config_vt import *
 
 
 # Keypoint extraction
@@ -37,9 +37,7 @@ def read_openpose_data(received_data):
     if received_data:
         received_data = received_data.get(0).asList()
         for i in range(0, received_data.size()):
-            print("size: " + received_data.size())
             keypoints = received_data.get(i).asList()
-
             if keypoints:
                 body_person = []
                 face_person = []
