@@ -3,6 +3,8 @@ import numpy as np
 import math
 import cv2
 import tensorflow as tf
+import json
+import yarp
 
 
 # Keypoint extraction
@@ -51,11 +53,17 @@ def read_openpose_data(received_data):
                             body_part = [part.get(1).asFloat64(), part.get(2).asFloat64(), part.get(3).asFloat64()]
                             body_person.append(body_part)
 
+                    else:
+                        print('Could not extract part')
                 if body_person:
                     body.append(body_person)
                 if face_person:
                     face.append(face_person)
 
+            else:
+                print('Could not extract keypoints') 
+    else:
+        print('No input data recieved')
     poses, conf_poses = load_many_poses(body)
     faces, conf_faces = load_many_faces(face)
 
