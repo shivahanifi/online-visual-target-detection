@@ -301,13 +301,12 @@ class VisualTargetDetection(yarp.RFModule):
 
                                     #img_blend = np.reshape(img_blend, (img_bbox.shape[0], img_bbox.shape[1],img_bbox[2]))
                                     img_blend = np.repeat(np.expand_dims(img_blend, axis=2), 3, axis=2)
-
                                     print(img_blend.shape)
                                     
-                                    img_blend_bbox = cv2.addWeighted(img_blend, 0.5,  np.asarray(img_bbox), 0.5, 0)
-                                    print(img_blend_bbox.shape)
+                                    #img_blend_bbox = cv2.addWeighted(img_blend, 0.5,  np.asarray(img_bbox), 0.5, 0)
+                                    #print(img_blend_bbox.shape)
 
-                                    img_blend_array = np.asarray(img_blend_bbox)
+                                    img_blend_array = np.asarray(img_blend)
                                     print(img_blend_array.shape)
 
 
