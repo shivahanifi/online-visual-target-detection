@@ -279,9 +279,10 @@ class VisualTargetDetection(yarp.RFModule):
                                    
                                     #norm_img = cv2.normalize(norm_map, None, 0, 255, cv2.NORM_MINMAX)
                                     #print(norm_img.shape)
-                                    img_jet = cv2.applyColorMap(norm_map, cv2.COLORMAP_JET)
+                                    norm_map_rgb = cv2.cvtColor(norm_map,cv2.CV_GRAY2RGB)
+                                    img_jet = cv2.applyColorMap(norm_map_rgb, cv2.COLORMAP_JET)
 
-                                    img_blend = cv2.addWeighted(img_jet, 0.5, norm_map, 0.5, 0)
+                                    img_blend = cv2.addWeighted(img_jet, 0.2, norm_map_rgb, 0.8, 0)
                                     print(img_blend.shape)
 
                                     #img_blend = np.reshape(img_blend, (img_bbox.shape[0], img_bbox.shape[1],img_bbox[2]))
@@ -291,7 +292,7 @@ class VisualTargetDetection(yarp.RFModule):
                                     img_blend_bbox = cv2.addWeighted(img_blend, 0.3,  np.asarray(img_bbox), 0.7, 0, dtype=cv2.CV_8U)
                                     #print(img_blend_bbox.shape)
 
-                                    img_blend_array = np.asarray(img_blend)
+                                    img_blend_array = np.asarray(img_blend_bbox)
                                     print(img_blend_array.shape)
 
 
