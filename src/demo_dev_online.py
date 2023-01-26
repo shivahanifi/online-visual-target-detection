@@ -304,7 +304,7 @@ class VisualTargetDetection(yarp.RFModule):
 
                                     print(img_blend.shape)
                                     
-                                    img_blend_bbox = cv2.addWeighted(img_blend, 0.5, img_bbox, 0.5, 0)
+                                    img_blend_bbox = cv2.addWeighted(img_blend, 0.5,  np.asarray(img_bbox), 0.5, 0)
                                     print(img_blend_bbox.shape)
 
                                     img_blend_array = np.asarray(img_blend_bbox)
