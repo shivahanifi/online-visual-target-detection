@@ -279,7 +279,7 @@ class VisualTargetDetection(yarp.RFModule):
                                    
                                     #norm_img = cv2.normalize(norm_map, None, 0, 255, cv2.NORM_MINMAX)
                                     #print(norm_img.shape)
-                                    norm_map_rgb = cv2.cvtColor(norm_map,cv2.CV_GRAY2RGB)
+                                    norm_map_rgb = cv2.cvtColor(norm_map,cv2.COLOR_GRAY2RGB)
                                     img_jet = cv2.applyColorMap(norm_map_rgb, cv2.COLORMAP_JET)
 
                                     img_blend = cv2.addWeighted(img_jet, 0.2, norm_map_rgb, 0.8, 0)
