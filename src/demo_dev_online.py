@@ -286,6 +286,7 @@ class VisualTargetDetection(yarp.RFModule):
                                     #plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
 
                                     # Convert the norm_map image to a 3-channel image with the 'jet' colormap
+                                    norm_map = np.dstack((norm_map, norm_map[:,:,1]))
                                     jet_map = cv2.applyColorMap(norm_map, cv2.COLORMAP_JET)
 
                                     # Create an alpha channel with a value of 0.2
