@@ -276,18 +276,19 @@ class VisualTargetDetection(yarp.RFModule):
                                     # Stack the jet_map and alpha channels together to create an RGBA image
                                     #rgba_map = np.dstack((jet_map, alpha))
                                     #print(rgba_map.shape) #(480, 640, 3)
-                                    norm_img = cv2.normalize(norm_map, None, 0, 255, cv2.NORM_MINMAX)
-                                    print(norm_img.shape)
-                                    img_jet = cv2.applyColorMap(norm_img, cv2.COLORMAP_JET)
+                                   
+                                    #norm_img = cv2.normalize(norm_map, None, 0, 255, cv2.NORM_MINMAX)
+                                    #print(norm_img.shape)
+                                    img_jet = cv2.applyColorMap(norm_map, cv2.COLORMAP_JET)
 
-                                    img_blend = cv2.addWeighted(img_jet, 1-0.2, norm_map, 0.2, 0)
+                                    img_blend = cv2.addWeighted(img_jet, 0.5, norm_map, 0.5, 0)
                                     print(img_blend.shape)
 
                                     #img_blend = np.reshape(img_blend, (img_bbox.shape[0], img_bbox.shape[1],img_bbox[2]))
                                     img_blend = np.repeat(np.expand_dims(img_blend, axis=2), 3, axis=2)
                                     print(img_blend.shape)
                                     
-                                    img_blend_bbox = cv2.addWeighted(img_blend, 0.5,  np.asarray(img_bbox), 0.5, 0, dtype=cv2.CV_8U)
+                                    img_blend_bbox = cv2.addWeighted(img_blend, 0.3,  np.asarray(img_bbox), 0.7, 0, dtype=cv2.CV_8U)
                                     #print(img_blend_bbox.shape)
 
                                     img_blend_array = np.asarray(img_blend)
