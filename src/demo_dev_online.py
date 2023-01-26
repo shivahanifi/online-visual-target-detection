@@ -236,7 +236,8 @@ class VisualTargetDetection(yarp.RFModule):
                                 inout = inout.cpu().detach().numpy()
                                 inout = 1 / (1 + np.exp(-inout))
                                 inout = (1 - inout) * 255
-                                norm_map = np.array(Image.fromarray(raw_hm).resize(height, width)) - inout
+                                norm_map = imresize(raw_hm, (height, width)) - inout
+                                plt.savefig('/projects/test_images/norm_map.png')
                                 print(norm_map.shape)
 
                                 # vis
@@ -268,6 +269,7 @@ class VisualTargetDetection(yarp.RFModule):
 
                                 if self.args.vis_mode == 'arrow':
                                     if inout < self.args.out_threshold: # in-frame gaze
+                                        print('in frame gaze')
                                         pred_x, pred_y = evaluation.argmax_pts(raw_hm)
                                         norm_p = [pred_x/output_resolution, pred_y/output_resolution]
                                         circs = cv2.circle(img_bbox, (norm_p[0]*width, norm_p[1]*height),  height/50.0, (35, 225, 35), -1)
@@ -282,9 +284,10 @@ class VisualTargetDetection(yarp.RFModule):
 
                                 else:
                                     #plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
-                                    img_color = cv2.applyColorMap(np.asarray(norm_map), cv2.COLORMAP_JET)
-                                    img_color_blend = cv2.addWeighted(np.asarray(norm_map), 1, img_color, 0.2, 0)
-                                    img_color_blend_array = np.asarray(img_color_blend)
+                                    norm_img = cv2.normalize(norm_map, None, 0, 255, cv2.NORM_MINMAX)
+                                    img_jet = cv2.applyColorMap(norm_img, cv2.COLORMAP_JET)
+                                    img_blend = cv2.addWeighted(img_jet, 0.2, norm_img, 1-0.2, 0)
+                                    img_color_blend_array = np.asarray(img_blend)
 
                                     self.out_buf_human_array[:, :] = img_color_blend_array
                                     self.out_port_human_image.write(self.out_buf_human_image)
