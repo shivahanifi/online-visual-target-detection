@@ -237,13 +237,15 @@ class VisualTargetDetection(yarp.RFModule):
                                 inout = 1 / (1 + np.exp(-inout))
                                 inout = (1 - inout) * 255
                                 norm_map = imresize(raw_hm, (height, width)) - inout
+                                print(norm_map.shape)
 
                                 # vis
 
                                 # Draw the raw_frame and the bbox
                                 start_point = (int(head_box[0]), int(head_box[1]))
                                 end_point = (int(head_box[2]), int(head_box[3]))
-                                img_bbox = cv2.rectangle(np.asarray(frame_raw),start_point,end_point, (0, 255, 0),2)                         
+                                img_bbox = cv2.rectangle(np.asarray(frame_raw),start_point,end_point, (0, 255, 0),2)  
+                                print(img_bbox.shape)                       
 
 
                                 # bbox test code
@@ -280,8 +282,8 @@ class VisualTargetDetection(yarp.RFModule):
 
                                 else:
                                     #plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
-                                    img_color = cv2.applyColorMap(norm_map, cv2.COLORMAP_JET)
-                                    img_color_blend = cv2.addWeighted(norm_map, 1, img_color, 0.2)
+                                    img_color = cv2.applyColorMap(np.asarray(norm_map), cv2.COLORMAP_JET)
+                                    img_color_blend = cv2.addWeighted(np.asarray(norm_map), 1, img_color, 0.2, 0)
                                     img_color_blend_array = np.asarray(img_color_blend)
 
                                     self.out_buf_human_array[:, :] = img_color_blend_array
