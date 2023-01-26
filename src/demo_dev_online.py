@@ -266,33 +266,31 @@ class VisualTargetDetection(yarp.RFModule):
                                     #plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
 
                                     # Convert the norm_map image to a 3-channel image with the 'jet' colormap
-                                    #norm_map = cv2.merge((norm_map,norm_map))
+                                    norm_map = cv2.merge((norm_map,norm_map))
                                     #print(norm_map.shape) #(480, 640, 2)
-                                    #jet_map = cv2.applyColorMap(norm_map, cv2.COLORMAP_JET)
+                                    jet_map = cv2.applyColorMap(norm_map, cv2.COLORMAP_JET)
 
                                     # Create an alpha channel with a value of 0.2
-                                    #alpha = np.ones((norm_map.shape[0], norm_map.shape[1], 1), dtype=np.uint8) * 51
+                                    alpha = np.ones((norm_map.shape[0], norm_map.shape[1], 1), dtype=np.uint8) * 51
                                     #print(alpha.shape) #(480, 640, 1)
                                     # Stack the jet_map and alpha channels together to create an RGBA image
-                                    #rgba_map = np.dstack((jet_map, alpha))
+                                    rgba_map = np.dstack((jet_map, alpha))
                                     #print(rgba_map.shape) #(480, 640, 3)
                                    
-                                    norm_img = cv2.normalize(norm_map, None, 0, 255, cv2.NORM_MINMAX)
+                                    #norm_img = cv2.normalize(norm_map, None, 0, 255, cv2.NORM_MINMAX)
                                     #print(norm_img.shape)
                                     #norm_map_rgb = cv2.cvtColor(norm_map,cv2.COLOR_GRAY2RG B) 
-                                    img_jet = cv2.applyColorMap(norm_img, cv2.COLORMAP_JET)
+                                    #img_jet = cv2.applyColorMap(norm_img, cv2.COLORMAP_JET)
 
-                                    img_blend = cv2.addWeighted(img_jet, 0.2, norm_map, 0.8, 0)
+                                    #img_blend = cv2.addWeighted(img_jet, 0.2, norm_map, 0.8, 0)
 
                                     #img_blend= np.repeat(np.expand_dims(img_blend, axis=2), 3, axis=2)
-                                    img_blend_rgb = cv2.cvtColor(img_blend, cv2.COLOR_GRAY2RGB)
-                                    print(img_blend_rgb.shape)
-                                    
-                                    img_blend_bbox = cv2.addWeighted(img_blend_rgb, 0.3,  np.asarray(img_bbox), 0.7, 0, dtype=cv2.CV_8U)
+                                    #img_blend_rgb = cv2.cvtColor(img_blend, cv2.COLOR_GRAY2RGB)
+
+                                    img_blend_bbox = cv2.addWeighted(rgba_map, 0.3,  np.asarray(img_bbox), 0.7, 0, dtype=cv2.CV_8U)
 
 
                                     img_blend_array = np.asarray(img_blend_bbox)
-                                    print(img_blend_array.shape)
 
 
                                     self.out_buf_human_array[:, :] = img_blend_array
