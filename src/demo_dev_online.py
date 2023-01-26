@@ -237,15 +237,13 @@ class VisualTargetDetection(yarp.RFModule):
                                 inout = 1 / (1 + np.exp(-inout))
                                 inout = (1 - inout) * 255
                                 norm_map = imresize(raw_hm, (height, width)) - inout
-                                print(norm_map.shape)
 
                                 # vis
 
                                 # Draw the raw_frame and the bbox
                                 start_point = (int(head_box[0]), int(head_box[1]))
                                 end_point = (int(head_box[2]), int(head_box[3]))
-                                img_bbox = cv2.rectangle(np.asarray(frame_raw),start_point,end_point, (0, 255, 0),2)  
-                                print(img_bbox.shape)                       
+                                img_bbox = cv2.rectangle(np.asarray(frame_raw),start_point,end_point, (0, 255, 0),2)                      
 
 
                                 # bbox test code
@@ -286,7 +284,7 @@ class VisualTargetDetection(yarp.RFModule):
                                     #plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
 
                                     # Convert the norm_map image to a 3-channel image with the 'jet' colormap
-                                    norm_map = np.dstack((norm_map, norm_map[:,:,1]))
+                                    norm_map = cv2.merge((norm_map,norm_map))
                                     jet_map = cv2.applyColorMap(norm_map, cv2.COLORMAP_JET)
 
                                     # Create an alpha channel with a value of 0.2
