@@ -1,15 +1,4 @@
 import yarp
-import argparse, os
-import logging
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torchvision
-from torchvision import datasets, transforms
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 import cv2
 import json
 import math
@@ -18,6 +7,17 @@ import yarp
 import PIL
 import sys
 import io
+import logging
+import torch
+import argparse, os
+import torchvision
+import torch.nn as nn
+import pandas as pd
+import numpy as np
+import torch.nn.functional as F
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+from torchvision import datasets, transforms
 from PIL import Image
 from PIL import ImageShow
 from scipy.misc import imresize
@@ -251,32 +251,16 @@ class VisualTargetDetection(yarp.RFModule):
                                 # self.out_buf_human_array[:, :] = img_bbox_array
                                 # self.out_port_human_image.write(self.out_buf_human_image)
 
-
-
-                                # plt.close()
-                                # plt.rcParams["figure.figsize"] = [20.00,20.00]
-                                # fig = plt.figure()
-                                # fig.canvas.manager.window.move(0,0)
-                                # plt.axis('off')
-                                # plt.imshow(frame_raw)
-
-                                # ax = plt.gca()
-                                # rect = patches.Rectangle((head_box[0], head_box[1]), head_box[2]-head_box[0], head_box[3]-head_box[1], linewidth=2, edgecolor=(0,1,0), facecolor='none')
-                                # ax.add_patch(rect)
-
                                 if self.args.vis_mode == 'arrow':
                                     if inout < self.args.out_threshold: # in-frame gaze
                                         pred_x, pred_y = evaluation.argmax_pts(raw_hm)
                                         norm_p = [pred_x/output_resolution, pred_y/output_resolution]
                                         circs = cv2.circle(img_bbox, (norm_p[0]*width, norm_p[1]*height),  height/50.0, (35, 225, 35), -1)
-                                        #circ = patches.Circle((norm_p[0]*width, norm_p[1]*height), height/50.0, facecolor=(0,1,0), edgecolor='none')
-                                        #ax.add_patch(circ)
                                         line = cv2.line(circs, (norm_p[0]*width,(head_box[0]+head_box[2])/2), (norm_p[1]*height,(head_box[1]+head_box[3])/2), (255, 0, 0), 2)
 
                                         line_array =  np.asarray(line)
                                         self.out_buf_human_array[:, :] = line_array
                                         self.out_port_human_image.write(self.out_buf_human_image)
-                                        #plt.plot((norm_p[0]*width,(head_box[0]+head_box[2])/2), (norm_p[1]*height,(head_box[1]+head_box[3])/2), '-', color=(0,1,0,1))
 
                                 else:
                                     #plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
@@ -303,7 +287,7 @@ class VisualTargetDetection(yarp.RFModule):
                                     img_blend = np.repeat(np.expand_dims(img_blend, axis=2), 3, axis=2)
                                     print(img_blend.shape)
                                     
-                                    #img_blend_bbox = cv2.addWeighted(img_blend, 0.5,  np.asarray(img_bbox), 0.5, 0)
+                                    img_blend_bbox = cv2.addWeighted(img_blend, 0.5,  np.asarray(img_bbox), 0.5, 0, dtype=cv2.CV_8U)
                                     #print(img_blend_bbox.shape)
 
                                     img_blend_array = np.asarray(img_blend)
@@ -325,16 +309,9 @@ class VisualTargetDetection(yarp.RFModule):
 
                                         # self.out_buf_human_array[:, :] = self.in_buf_human_array
                                         # self.out_port_human_image.write(self.out_buf_human_image)
-                    else:
-                        print('Could not get the poses')
                 except Exception as err:
                     print("An error occured while extracting the poses from OpenPose data")
                     print("Unexpected error!!! " + str(err))
-            else:
-                print('No data from OpenPose recieved')
-        else:
-            print('No input images recieved')    
-
         return True                  
 
 if __name__ == '__main__':
