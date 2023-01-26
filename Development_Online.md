@@ -7,6 +7,7 @@
     - [Errors & Attempts](#errors--attempts)
   - [How to Run the Code](#how-to-run-the-code)
   - [Test w/ Dumped Data](#test-w-dumped-data)
+  - [Test Simplified Versions](#test-simplified-versions)
   
 
 ## Road Map
@@ -120,3 +121,22 @@ You can test if the localhost can see the yarpserver with `yarp detect`. This co
 Test if both the docker and the localhost can see the same ports with the `yarp name list` command.
 
 ![ports](Img/ports.png)
+
+## Test Simplified Versions
+Related code for each step can be found in [dev_online_code_explained.md](https://github.com/shivahanifi/online-visual-target-detection/blob/main/src/dev_online_code_explained.md).
+1. Copy input into output
+
+    This is a simple test just to see if we can successfully send the input image to the output port without any change and visualize it. The result was displaying the same frames both in the input and output.
+      
+      ![test](Img/test.png)
+
+2. Visualize only the boundingbox
+
+    With the second test the aim is to draw the head bounding boxes for the dumped data.
+   A sample frame from the results is presented.
+
+      ![test_bbox](Img/test_bbox.png)
+
+    - Note 1: The same application XML file was used, no need for any changes.
+
+    - Note 2: The results were being displayed with a bit of a lag with respect to the inputs, which is due to the GPU. With an external GPU the problem will be solved.

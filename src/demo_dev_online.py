@@ -238,15 +238,16 @@ class VisualTargetDetection(yarp.RFModule):
                                 inout = (1 - inout) * 255
                                 norm_map = imresize(raw_hm, (height, width)) - inout
 
-                                # vis
-
+                                # Visualization
                                 # Draw the raw_frame and the bbox
                                 start_point = (int(head_box[0]), int(head_box[1]))
                                 end_point = (int(head_box[2]), int(head_box[3]))
                                 img_bbox = cv2.rectangle(np.asarray(frame_raw),start_point,end_point, (0, 255, 0),2)                      
-
+                                
+                                # The arrow mode
                                 if self.args.vis_mode == 'arrow':
-                                    if inout < self.args.out_threshold: # in-frame gaze
+                                    # in-frame gaze
+                                    if inout < self.args.out_threshold: 
                                         pred_x, pred_y = evaluation.argmax_pts(raw_hm)
                                         norm_p = [pred_x/output_resolution, pred_y/output_resolution]
                                         circs = cv2.circle(img_bbox, (norm_p[0]*width, norm_p[1]*height),  height/50.0, (35, 225, 35), -1)
@@ -256,6 +257,7 @@ class VisualTargetDetection(yarp.RFModule):
                                         self.out_buf_human_array[:, :] = line_array
                                         self.out_port_human_image.write(self.out_buf_human_image)
 
+                                # The heatmap mode
                                 else:
 
                                     # Convert the norm_map image to a 3-channel image with the 'jet' colormap

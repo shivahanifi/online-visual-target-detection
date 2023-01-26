@@ -263,3 +263,162 @@ It contains the part of the code that will iterate. Here we include all the step
 
         return True   
     ```
+
+3. Visualize the heatmap and the boundingbox
+This is the final step and the goal is to integrate all parts of the module. In order to visualize the heatmap there were few steps to complete. 
+
+    - The original code was using matplotlib and plotting all the steps separately and finally visualizing all of them on top of each other. However, we wanted to use openCV, as we did in the previous step, and plot the heatmap on the bounding box image we got from the last step.
+
+    - The `norm_map` provided with the original code is a gray scale image with 1 channel and the bounding box image is a RGB image with 3 channels, and it is a problem when trying to blend them.
+
+   The result for this part is shown below:
+
+    ![test_heatmap](Img/test_heatmap.png)
+
+    - Note 1: The `self.args.vis_mode == 'arrow'` mode is not on and we are using the heatmap, but the code for the arrow mode has also updated and rewritten with openCv. (This part has not been tested.)
+    
+  ### Errors
+  1. ` Bad argument (When the input arrays in add/subtract/multiply/divide functions have different types, the output array type must be explicitly specified)`
+
+  I was receiving this error when trying to blend the bounding box image and the heatmap image.
+
+  
+  To repeat this step you can replace the `updateModule` with the code below.
+
+  ```
+  def updateModule(self):
+    
+        received_image = self.in_port_human_image.read()
+        self.in_buf_human_image.copy(received_image)
+        assert self.in_buf_human_array.__array_interface__['data'][0] == self.in_buf_human_image.getRawImage().__int__()
+
+        # Convert the numpy array to a PIL image
+        pil_image = Image.fromarray(self.in_buf_human_array)
+        
+       
+        # To check the input
+        #pil_image.save('/projects/test_images/pil_image.png')
+
+        if pil_image:
+            received_data = self.in_port_human_data.read()
+            if received_data:
+                try:
+                    poses, conf_poses, faces, conf_faces = read_openpose_data(received_data)
+                
+                    if poses:
+                        min_x, min_y, max_x, max_y = get_openpose_bbox(poses)
+
+                        column_names = ['left', 'top', 'right', 'bottom']
+                        line_to_write = [[min_x, min_y, max_x, max_y]]
+                        df = pd.DataFrame(line_to_write, columns=column_names)
+    
+                        df['left'] -= (df['right']-df['left'])*0.1
+                        df['right'] += (df['right']-df['left'])*0.1
+                        df['top'] -= (df['bottom']-df['top'])*0.1
+                        df['bottom'] += (df['bottom']-df['top'])*0.1
+
+
+                        # Transforming images
+                        def get_transform():
+                            transform_list = []
+                            transform_list.append(transforms.Resize((input_resolution, input_resolution)))
+                            transform_list.append(transforms.ToTensor())
+                            transform_list.append(transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]))
+                            return transforms.Compose(transform_list)
+
+
+                         # set up data transformation
+                        test_transforms = get_transform()
+
+                        model = ModelSpatial()
+                        model_dict = model.state_dict()
+                        pretrained_dict = torch.load(self.args.model_weights)
+                        pretrained_dict = pretrained_dict['model']
+                        model_dict.update(pretrained_dict)
+                        model.load_state_dict(model_dict)
+
+                        model.cuda()
+                        model.train(False)
+
+                        with torch.no_grad():
+                            for i in df.index:
+                                frame_raw = pil_image
+                            
+                                width, height = frame_raw.size
+
+                                head_box = [df.loc[i,'left'], df.loc[i,'top'], df.loc[i,'right'], df.loc[i,'bottom']]
+
+                                head = frame_raw.crop((head_box)) # head crop
+
+                                head = test_transforms(head) # transform inputs
+                                frame = test_transforms(frame_raw)
+                                head_channel = imutils.get_head_box_channel(head_box[0], head_box[1], head_box[2], head_box[3], width, height,
+                                                                            resolution=input_resolution).unsqueeze(0)
+
+                                head = head.unsqueeze(0).cuda()
+                                frame = frame.unsqueeze(0).cuda()
+                                head_channel = head_channel.unsqueeze(0).cuda()
+
+                                # forward pass
+                                raw_hm, _, inout = model(frame, head_channel, head)
+
+                                # heatmap modulation
+                                raw_hm = raw_hm.cpu().detach().numpy() * 255
+                                raw_hm = raw_hm.squeeze()
+                                inout = inout.cpu().detach().numpy()
+                                inout = 1 / (1 + np.exp(-inout))
+                                inout = (1 - inout) * 255
+                                norm_map = imresize(raw_hm, (height, width)) - inout
+
+                                # vis
+
+                                # Draw the raw_frame and the bbox
+                                start_point = (int(head_box[0]), int(head_box[1]))
+                                end_point = (int(head_box[2]), int(head_box[3]))
+                                img_bbox = cv2.rectangle(np.asarray(frame_raw),start_point,end_point, (0, 255, 0),2)                      
+
+                                if self.args.vis_mode == 'arrow':
+                                    if inout < self.args.out_threshold: # in-frame gaze
+                                        pred_x, pred_y = evaluation.argmax_pts(raw_hm)
+                                        norm_p = [pred_x/output_resolution, pred_y/output_resolution]
+                                        circs = cv2.circle(img_bbox, (norm_p[0]*width, norm_p[1]*height),  height/50.0, (35, 225, 35), -1)
+                                        line = cv2.line(circs, (norm_p[0]*width,(head_box[0]+head_box[2])/2), (norm_p[1]*height,(head_box[1]+head_box[3])/2), (255, 0, 0), 2)
+
+                                        line_array =  np.asarray(line)
+                                        self.out_buf_human_array[:, :] = line_array
+                                        self.out_port_human_image.write(self.out_buf_human_image)
+
+                                else:
+
+                                    # Convert the norm_map image to a 3-channel image with the 'jet' colormap
+                                    norm_map = cv2.merge((norm_map,norm_map))
+                                    #print(norm_map.shape) #(480, 640, 2)
+                                    jet_map = cv2.applyColorMap(norm_map, cv2.COLORMAP_JET)
+                                    # Create an alpha channel with a value of 0.2
+                                    alpha = np.ones((norm_map.shape[0], norm_map.shape[1], 1), dtype=np.uint8) * 51
+                                    #print(alpha.shape) #(480, 640, 1)
+                                    # Stack the jet_map and alpha channels together to create an RGBA image
+                                    rgba_map = np.dstack((jet_map, alpha))
+                                    #print(rgba_map.shape) #(480, 640, 3)
+                                   
+                                    #norm_img = cv2.normalize(norm_map, None, 0, 255, cv2.NORM_MINMAX)
+                                    #print(norm_img.shape)
+                                    #norm_map_rgb = cv2.cvtColor(norm_map,cv2.COLOR_GRAY2RG B) 
+                                    #img_jet = cv2.applyColorMap(norm_img, cv2.COLORMAP_JET)
+                                    #img_blend = cv2.addWeighted(img_jet, 0.2, norm_map, 0.8, 0)
+                                    #img_blend= np.repeat(np.expand_dims(img_blend, axis=2), 3, axis=2)
+                                    #img_blend_rgb = cv2.cvtColor(img_blend, cv2.COLOR_GRAY2RGB)
+
+                                    # Display both the bbox and heatmap on the image
+                                    img_blend_bbox = cv2.addWeighted(rgba_map, 0.4,  np.asarray(img_bbox), 0.6, 0, dtype=cv2.CV_8U)
+
+                                    # Connect it to the output port
+                                    img_blend_array = np.asarray(img_blend_bbox)
+                                    self.out_buf_human_array[:, :] = img_blend_array
+                                    self.out_port_human_image.write(self.out_buf_human_image)
+
+                except Exception as err:
+                    print("An error occured while extracting the poses from OpenPose data")
+                    print("Unexpected error!!! " + str(err))
+        return True                  
+  ```
