@@ -294,10 +294,10 @@ class VisualTargetDetection(yarp.RFModule):
                                     print(rgba_map.shape)
                                     # norm_img = cv2.normalize(norm_map, None, 0, 255, cv2.NORM_MINMAX)
                                     # img_jet = cv2.applyColorMap(norm_img, cv2.COLORMAP_JET)
-                                    # img_blend = cv2.addWeighted(img_jet, 0.2, norm_img, 1-0.2, 0)
-                                    img_color_blend_array = np.asarray(rgba_map)
+                                    img_blend = cv2.addWeighted(rgba_map, 0.2, img_bbox, 1-0.2, 0)
+                                    img_blend_array = np.asarray(img_blend)
 
-                                    self.out_buf_human_array[:, :] = img_color_blend_array
+                                    self.out_buf_human_array[:, :] = img_blend_array
                                     self.out_port_human_image.write(self.out_buf_human_image)
 
                                 #plt.savefig('bbox.png', dpi=300)
