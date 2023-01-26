@@ -297,8 +297,9 @@ class VisualTargetDetection(yarp.RFModule):
                                     img_jet = cv2.applyColorMap(norm_img, cv2.COLORMAP_JET)
 
                                     img_blend = cv2.addWeighted(img_jet, 0.2, norm_map, 1-0.2, 0)
+                                    print(img_blend.shape)
 
-                                    img_blend = np.reshape(img_blend, (img_bbox.shape[1], img_bbox.shape[0]))
+                                    img_blend = np.reshape(img_blend, (img_bbox.shape[0], img_bbox.shape[1],img_bbox[2]))
                                     print(img_blend.shape)
                                     
                                     img_blend_bbox = cv2.addWeighted(img_blend, 0.5, img_bbox, 0.5, 0)
