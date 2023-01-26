@@ -245,12 +245,6 @@ class VisualTargetDetection(yarp.RFModule):
                                 end_point = (int(head_box[2]), int(head_box[3]))
                                 img_bbox = cv2.rectangle(np.asarray(frame_raw),start_point,end_point, (0, 255, 0),2)                      
 
-
-                                # bbox test code
-                                # img_bbox_array = np.asarray(img_bbox)
-                                # self.out_buf_human_array[:, :] = img_bbox_array
-                                # self.out_port_human_image.write(self.out_buf_human_image)
-
                                 if self.args.vis_mode == 'arrow':
                                     if inout < self.args.out_threshold: # in-frame gaze
                                         pred_x, pred_y = evaluation.argmax_pts(raw_hm)
@@ -263,13 +257,11 @@ class VisualTargetDetection(yarp.RFModule):
                                         self.out_port_human_image.write(self.out_buf_human_image)
 
                                 else:
-                                    #plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
 
                                     # Convert the norm_map image to a 3-channel image with the 'jet' colormap
                                     norm_map = cv2.merge((norm_map,norm_map))
                                     #print(norm_map.shape) #(480, 640, 2)
                                     jet_map = cv2.applyColorMap(norm_map, cv2.COLORMAP_JET)
-
                                     # Create an alpha channel with a value of 0.2
                                     alpha = np.ones((norm_map.shape[0], norm_map.shape[1], 1), dtype=np.uint8) * 51
                                     #print(alpha.shape) #(480, 640, 1)
@@ -281,33 +273,18 @@ class VisualTargetDetection(yarp.RFModule):
                                     #print(norm_img.shape)
                                     #norm_map_rgb = cv2.cvtColor(norm_map,cv2.COLOR_GRAY2RG B) 
                                     #img_jet = cv2.applyColorMap(norm_img, cv2.COLORMAP_JET)
-
                                     #img_blend = cv2.addWeighted(img_jet, 0.2, norm_map, 0.8, 0)
-
                                     #img_blend= np.repeat(np.expand_dims(img_blend, axis=2), 3, axis=2)
                                     #img_blend_rgb = cv2.cvtColor(img_blend, cv2.COLOR_GRAY2RGB)
 
-                                    img_blend_bbox = cv2.addWeighted(rgba_map, 0.3,  np.asarray(img_bbox), 0.7, 0, dtype=cv2.CV_8U)
+                                    # Display both the bbox and heatmap on the image
+                                    img_blend_bbox = cv2.addWeighted(rgba_map, 0.4,  np.asarray(img_bbox), 0.6, 0, dtype=cv2.CV_8U)
 
-
+                                    # Connect it to the output port
                                     img_blend_array = np.asarray(img_blend_bbox)
-
-
                                     self.out_buf_human_array[:, :] = img_blend_array
                                     self.out_port_human_image.write(self.out_buf_human_image)
 
-                                #plt.savefig('bbox.png', dpi=300)
-                                #plt.show(block=False)
-                                # fig.canvas.draw()
-                                # img_array = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.unit8)
-                                # yarp_image = yarp.ImageFloat()
-                                # yarp_image.setExternal(img_array, img_array.shape[1], img_array.shape[0])
-                                # self.out_port_human_image.write(yarp_image)
-                                # plt.pause(1)
-        #                         plt.savefig('/home/r1-user/code_sh/new_new/attention-target-detection/data/demo/offLine_output/fig{0}.png'.format(i))
-
-                                        # self.out_buf_human_array[:, :] = self.in_buf_human_array
-                                        # self.out_port_human_image.write(self.out_buf_human_image)
                 except Exception as err:
                     print("An error occured while extracting the poses from OpenPose data")
                     print("Unexpected error!!! " + str(err))
