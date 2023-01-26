@@ -195,7 +195,6 @@ class VisualTargetDetection(yarp.RFModule):
                             return transforms.Compose(transform_list)
 
 
-                         #logging.debug(df)
                          # set up data transformation
                         test_transforms = get_transform()
 
@@ -231,31 +230,26 @@ class VisualTargetDetection(yarp.RFModule):
                                 # forward pass
                                 raw_hm, _, inout = model(frame, head_channel, head)
 
-                                #logging.debug(raw_hm)
-                                #logging.debug(inout)
-
                                 # heatmap modulation
-                                # raw_hm = raw_hm.cpu().detach().numpy() * 255
-                                # raw_hm = raw_hm.squeeze()
-                                # inout = inout.cpu().detach().numpy()
-                                # inout = 1 / (1 + np.exp(-inout))
-                                # inout = (1 - inout) * 255
-                                # norm_map = imresize(raw_hm, (height, width)) - inout
+                                raw_hm = raw_hm.cpu().detach().numpy() * 255
+                                raw_hm = raw_hm.squeeze()
+                                inout = inout.cpu().detach().numpy()
+                                inout = 1 / (1 + np.exp(-inout))
+                                inout = (1 - inout) * 255
+                                norm_map = imresize(raw_hm, (height, width)) - inout
 
                                 # vis
 
                                 # Draw the raw_frame and the bbox
                                 start_point = (int(head_box[0]), int(head_box[1]))
                                 end_point = (int(head_box[2]), int(head_box[3]))
-                                img_bbox = cv2.rectangle(np.asarray(frame_raw),start_point,end_point, (0, 255, 0),2)
-                                cv2.imwrite('/projects/test_images/img_bbox.png', img_bbox)
-                                #cv2.imshow('bbox', img_bbox)
-                                #cv2.waitKey(0)
-                            
+                                img_bbox = cv2.rectangle(np.asarray(frame_raw),start_point,end_point, (0, 255, 0),2)                         
 
-                                img_bbox_array = np.asarray(img_bbox)
-                                self.out_buf_human_array[:, :] = img_bbox_array
-                                self.out_port_human_image.write(self.out_buf_human_image)
+
+                                # bbox test code
+                                # img_bbox_array = np.asarray(img_bbox)
+                                # self.out_buf_human_array[:, :] = img_bbox_array
+                                # self.out_port_human_image.write(self.out_buf_human_image)
 
 
 
@@ -270,21 +264,28 @@ class VisualTargetDetection(yarp.RFModule):
                                 # rect = patches.Rectangle((head_box[0], head_box[1]), head_box[2]-head_box[0], head_box[3]-head_box[1], linewidth=2, edgecolor=(0,1,0), facecolor='none')
                                 # ax.add_patch(rect)
 
-        #                         if self.args.vis_mode == 'arrow':
-        #                             if inout < self.args.out_threshold: # in-frame gaze
-        #                                 pred_x, pred_y = evaluation.argmax_pts(raw_hm)
-        #                                 norm_p = [pred_x/output_resolution, pred_y/output_resolution]
-        #                                 circ = patches.Circle((norm_p[0]*width, norm_p[1]*height), height/50.0, facecolor=(0,1,0), edgecolor='none')
-        #                                 ax.add_patch(circ)
-        #                                 plt.plot((norm_p[0]*width,(head_box[0]+head_box[2])/2), (norm_p[1]*height,(head_box[1]+head_box[3])/2), '-', color=(0,1,0,1))
+                                if self.args.vis_mode == 'arrow':
+                                    if inout < self.args.out_threshold: # in-frame gaze
+                                        pred_x, pred_y = evaluation.argmax_pts(raw_hm)
+                                        norm_p = [pred_x/output_resolution, pred_y/output_resolution]
+                                        circs = cv2.circle(img_bbox, (norm_p[0]*width, norm_p[1]*height),  height/50.0, (35, 225, 35), -1)
+                                        #circ = patches.Circle((norm_p[0]*width, norm_p[1]*height), height/50.0, facecolor=(0,1,0), edgecolor='none')
+                                        #ax.add_patch(circ)
+                                        line = cv2.line(circs, (norm_p[0]*width,(head_box[0]+head_box[2])/2), (norm_p[1]*height,(head_box[1]+head_box[3])/2), (255, 0, 0), 2)
 
-        #                                 #logging.debug(args.vis_mode)
-        #                                 #logging.debug(inout)
-        #                                 #logging.debug(args.out_threshold)
-        #                                 #logging.debug(norm_p)
+                                        line_array =  np.asarray(line)
+                                        self.out_buf_human_array[:, :] = line_array
+                                        self.out_port_human_image.write(self.out_buf_human_image)
+                                        #plt.plot((norm_p[0]*width,(head_box[0]+head_box[2])/2), (norm_p[1]*height,(head_box[1]+head_box[3])/2), '-', color=(0,1,0,1))
 
-        #                         else:
-        #                             plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
+                                else:
+                                    #plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
+                                    img_color = cv2.applyColorMap(norm_map, cv2.COLORMAP_JET)
+                                    img_color_blend = cv2.addWeighted(norm_map, 1, img_color, 0.2)
+                                    img_color_blend_array = np.asarray(img_color_blend)
+
+                                    self.out_buf_human_array[:, :] = img_color_blend_array
+                                    self.out_port_human_image.write(self.out_buf_human_image)
 
                                 #plt.savefig('bbox.png', dpi=300)
                                 #plt.show(block=False)
