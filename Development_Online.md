@@ -87,6 +87,11 @@ Follow the steps below to run the code.
     ```
 You should see that the ports you have defined inside the code are opened and working properly.
 
+- Note: If you recieve an error like could not find model.pt, it is related to the original code you need to download the weights and etc. needed for the code using:
+    ```
+    sh download_models.sh
+    ```
+
 ## Test w/ Dumped Data
 Inorder to use the previously dumped data, `yarpdatapalyer` will be used. It will play the data as if they are streaming from a camera. Inside the docker, there was an error related to QT libraries which caused problems when trying to open a yarpview and visualize the data. To overcome this issue we are using the yarpview and the yarpdataplayer from the yarp installed on the localhost. An [application XML file](https://github.com/shivahanifi/online-visual-target-detection/blob/main/app/scripts/vtd_app.xml) is created such that connects the ports from the code inside the docker with the dataplayer and the yarpview on the localhost (we are treating them as two different machines running on the same nameserver).
 

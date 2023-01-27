@@ -293,3 +293,4 @@ if __name__ == '__main__':
     # Run module
     manager = VisualTargetDetection()
     manager.runModule(rf)
+    
