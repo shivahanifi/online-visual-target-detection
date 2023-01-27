@@ -275,12 +275,26 @@ This is the final step and the goal is to integrate all parts of the module. In 
 
     ![test_heatmap](Img/test_heatmap.png)
 
-    - Note 1: The `self.args.vis_mode == 'arrow'` mode is not on and we are using the heatmap, but the code for the arrow mode has also updated and rewritten with openCv. (This part has not been tested.)
+    - Note: The `self.args.vis_mode == 'arrow'` mode is not on and we are using the heatmap to visualize attention, but the code for the arrow mode has also been updated and rewritten with openCv. (This part has not been tested.)
     
   ### Errors
   1. ` Bad argument (When the input arrays in add/subtract/multiply/divide functions have different types, the output array type must be explicitly specified)`
 
-  I was receiving this error when trying to blend the bounding box image and the heatmap image.
+      I was receiving this error when trying to blend the bounding box image and the heatmap image. To solve it I did need to specify the output type with `dtype=cv2.CV_8U`. CV_8U is unsigned 8bit/pixel, i.e. a pixel can have values 0-255, this is the normal range for most image and video formats. I chose this type since in the original code it is specifying vmin=0, vmax=255.
+
+  2. Heatmap displayed in gray-scale
+    
+      Using this code for generating the heatmap was resulting in the heatmap without any color. i.e. the jet color map that I was applying was not represented.
+      ```
+        norm_img = cv2.normalize(norm_map, None, 0, 255, cv2.NORM_MINMAX)
+        print(norm_img.shape)
+        norm_map_rgb = cv2.cvtColor(norm_map,cv2.COLOR_GRAY2RG B) 
+        img_jet = cv2.applyColorMap(norm_img, cv2.COLORMAP_JET)
+        img_blend = cv2.addWeighted(img_jet, 0.2, norm_map, 0.8, 0)
+        img_blend= np.repeat(np.expand_dims(img_blend, axis=2), 3, axis=2)
+        img_blend_rgb = cv2.cvtColor(img_blend, cv2.COLOR_GRAY2RGB)
+      ```
+      To solve the problem, instead of using the `cv2.COLOR_GRAY2RGB` to have a 3 channel image I tried to generate an alpha map and stack it with the norm_map.
 
   
   To repeat this step you can replace the `updateModule` with the code below.

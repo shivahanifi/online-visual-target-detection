@@ -140,3 +140,10 @@ Related code for each step can be found in [dev_online_code_explained.md](https:
     - Note 1: The same application XML file was used, no need for any changes.
 
     - Note 2: The results were being displayed with a bit of a lag with respect to the inputs, which is due to the GPU. With an external GPU the problem will be solved.
+
+3. Visualize the heatmap and the boundingbox
+This is the final step and the goal is to integrate all parts of the module. The result for this part is shown below:
+
+    ![test_heatmap](Img/test_heatmap.png)
+
+    - Note: The `self.args.vis_mode == 'arrow'` mode is not on and we are using the heatmap to visualize attention, but the code for the arrow mode has also been updated and rewritten with openCv. (This part has not been tested.)
