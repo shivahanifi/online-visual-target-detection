@@ -1,26 +1,20 @@
 
 <application>
 <name>visual target detection online</name>
-<version>1.0</version>
+<version>2.0</version>
 
 <!-- Modules -->
 
 	<module>
+		<name>yarpdev</name>
+		<parameters>--context realsense --from realsense2Conf_640_480.ini</parameters>
+		<node>iiticublap235</node>
+	</module>
+
+	<module>
 		<name>yarpOpenPose</name>
-		<parameters></parameters>
-		<node></node>
-	</module>
-
-	<module>
-		<name>yarpdev</name>
-		<parameters></parameters>
-		<node></node>
-	</module>
-
-	<module>
-		<name>yarpdev</name>
-		<parameters></parameters>
-		<node></node>
+		<parameters>--from /home/icub/shared/conf/yarpOpenPose.ini</parameters>
+		<node>docker-mg</node>
 	</module>
 
 	<module>
@@ -31,64 +25,44 @@
 
 	<module>
 		<name>yarpview</name>
-		<parameters>--name /view/skeleton --w 640 --h 480</parameters>
+		<parameters>--name /view/bbox --w 640 --h 480</parameters>
 		<node>localhost</node>
 	</module>
-
 
 <!-- Connections -->
 
 	<connection>
 		<from>/depthCamera/rgbImage:o</from>
-		<to>/view/rgb</to>
-		<protocol>mjpeg</protocol>
-	</connection>
-
-	<connection>
-		<from>/depthCamera/rgbImage:o</from>
 		<to>/yarpOpenPose/image:i</to>
 		<protocol>mjpeg</protocol>
 	</connection>
 
-	<connection>
-		<from>/webcam/rgbImage:o</from>
-		<to>/view/rgb</to>
-		<protocol>mjpeg</protocol>
-	</connection>
-
-	<connection>
-		<from>/webcam/rgbImage:o</from>
-		<to>/yarpOpenPose/image:i</to>
-		<protocol>mjpeg</protocol>
-	</connection>
-
-	<connection>
-		<from>/yarpOpenPose/image:o</from>
-		<to>/view/skeleton</to>
-		<protocol>mjpeg</protocol>
-	</connection>
-	
 	<connection>
 		<from>/yarpOpenPose/propag:o</from>
-		<to>/mutualgaze/image:i</to>
+		<to>/view/rgb</to>
 		<protocol>mjpeg</protocol>
 	</connection>
 
+    <!-- raw image to input -->
 	<connection>
+		<from>/yarpOpenPose/propag:o</from>
+		<to>/vtd/image:i</to>
+		<protocol>mjpeg</protocol>
+	</connection>
+
+	<!-- yarpopenpose data to input -->
+    <connection>
 		<from>/yarpOpenPose/target:o</from>
-		<to>/mutualgaze/data:i</to>
+		<to>/vtd/data:i</to>
+		<protocol>tcp</protocol>
 	</connection>
 
-	<connection>
-	      	<from>/depthCamera/depthImage:o</from>
-	      	<to>/mutualgaze/depth:i</to>
-	      	<protocol>fast_tcp</protocol>
-	</connection>
 
+    <!-- visualize bbox -->
 	<connection>
-	      	<from>/mutualgaze/image:o</from>
-	      	<to>/view/eyecontact</to>
-	      	<protocol>mjpeg</protocol>
+		<from>/vtd/image:o</from>
+		<to>/view/bbox</to>
+		<protocol>mjpeg</protocol>
 	</connection>
 
 </application>

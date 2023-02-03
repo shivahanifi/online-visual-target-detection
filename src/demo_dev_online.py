@@ -271,7 +271,7 @@ class VisualTargetDetection(yarp.RFModule):
                                     rgba_map = np.dstack((jet_map, alpha))
 
                                     # Display both the bbox and heatmap on the image
-                                    img_blend_bbox = cv2.addWeighted(rgba_map, 0.4,  np.asarray(img_bbox), 0.6, 0, dtype=cv2.CV_8U)
+                                    img_blend_bbox = cv2.addWeighted(rgba_map, 0.3,  np.asarray(img_bbox), 0.7, 0, dtype=cv2.CV_8U)
 
                                     # Connect to the output port
                                     img_blend_array = np.asarray(img_blend_bbox)
