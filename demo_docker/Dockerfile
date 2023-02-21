@@ -179,8 +179,11 @@ RUN cd ${PROJECTS_DIR} &&\
     git clone https://github.com/ejcgt/attention-target-detection.git &&\
     cd attention-target-detection &&\
     conda env create --name myenv-vtd -f environment.yml &&\
+    pip install tensorflow
+
+RUN cd ${PROJECTS_DIR} &&\
+    git clone https://github.com/shivahanifi/online-visual-target-detection.git &&\
     sh download_models.sh 
- 
     
 
 
