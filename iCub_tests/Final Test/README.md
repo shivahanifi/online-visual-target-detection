@@ -26,16 +26,16 @@ There will be one session for each setting for each person. For each object a 5 
 
 - Result
 
-     <img src="img/result.png" alt="Result" width="800"/>
+     <img src="img/result1.png" alt="Result" width="800"/>
 
 ## Observations
 1. The module is less accurate when the visually attended area is on the outer left side of the scene. To be more clear, out of 11 error cases, 6 are related to this situation (% 54.54).
 
     ( e.g. `session1-elisa-masterchef`, `session3-elisa-box`, `session4-shiva-box`, `session4-elisa-driller`, `session5-shiva-driller`, `session5-elisa-driller`)
 
-    <img src="img/session1-elisa-masterchef.png" alt="session1-elisa-masterchef" width="350"/>
+    <img src="img/session1-elisa-masterchef.png" alt="session1-elisa-masterchef" width="400"/>
 
-    <img src="img/session5-shiva-driller.png" alt="session5-shiva-driller" width="350"/>
+    <img src="img/session5-shiva-driller.png" alt="session5-shiva-driller" width="400"/>
 
 2. Errors have occured with all the objects at least one time, which indicates that the type, size, and color of the object is not affecting the output.
     - NOTE: The objects used in these experiments do not differ in size a lot. However, in the previous experiments it was observed that an object with a larger surface captures the attention and leads to error. (e.g. the case of cracker box and strawberry).
