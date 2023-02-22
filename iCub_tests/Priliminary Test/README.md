@@ -1,4 +1,7 @@
 # Preliminary Test With iCub
+
+https://user-images.githubusercontent.com/78621902/220599778-48063bd9-4c7d-4db0-8f78-88809adb1ce2.mp4
+
 ## Run machines on the same server
 1. This is the first step to connect the machine that the code is runing on and the iCub. To do so, they should be runnning on the same Yarp name space. Eventhough we connect the machine with code physically to the same network that iCub is on (with LAN), we check the `yarp namespace` on the machine. In our case it was `root`, and we had to change it to the one in the iCub's system.
 
@@ -52,3 +55,7 @@ Here we are using five objects (cracker box, wallet, strawberry, brown cube, yel
 	![yellow cup](img/shiva_yellowCup.png) 
 
 - Note: To reduce the dominance of the heatmap in visualization, I addjusted the coefficients in the main code when using `cv2.addWeighted` for the heatmap and bounding box image.
+
+
+
+
