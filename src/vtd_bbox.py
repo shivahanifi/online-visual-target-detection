@@ -113,6 +113,18 @@ class AttentiveObjectDetection(yarp.RFModule):
         parser.add_argument('--out_threshold', type=int, help='out-of-frame target dicision threshold', default=100)
         self.args = parser.parse_args()
 
+
+        # Load model 
+        self.model = ModelSpatial()
+        model_dict = self.model.state_dict()
+        pretrained_dict = torch.load(self.args.model_weights)
+        pretrained_dict = pretrained_dict['model']
+        model_dict.update(pretrained_dict)
+        self.model.load_state_dict(model_dict)
+
+        self.model.cuda()
+        self.model.train(False)
+
         return True
     
     # Respond to a message
@@ -185,15 +197,18 @@ class AttentiveObjectDetection(yarp.RFModule):
                 
                     if poses:
                         min_x, min_y, max_x, max_y = get_openpose_bbox(poses)
+                        #head_box = [df.loc[i,'left'], df.loc[i,'top'], df.loc[i,'right'], df.loc[i,'bottom']]
+                        head_box = [min_x-(max_x-min_x)*0.1, min_y-(max_y-min_y)*0.1, max_x+(max_x-min_x)*0.1, max_y+(max_y-min_y)*0.1]
 
-                        column_names = ['left', 'top', 'right', 'bottom']
-                        line_to_write = [[min_x, min_y, max_x, max_y]]
-                        df = pd.DataFrame(line_to_write, columns=column_names)
+                        #column_names = ['left', 'top', 'right', 'bottom']
+                        #line_to_write = [[min_x, min_y, max_x, max_y]]
+                        #df = pd.DataFrame(line_to_write, columns=column_names)
     
-                        df['left'] -= (df['right']-df['left'])*0.1
-                        df['right'] += (df['right']-df['left'])*0.1
-                        df['top'] -= (df['bottom']-df['top'])*0.1
-                        df['bottom'] += (df['bottom']-df['top'])*0.1
+                        #df['left'] -= (df['right']-df['left'])*0.1
+                        #df['right'] += (df['right']-df['left'])*0.1
+                        #df['top'] -= (df['bottom']-df['top'])*0.1
+                        #df['bottom'] += (df['bottom']-df['top'])*0.1
+                        #head_box = [df.loc[i,'left'], df.loc[i,'top'], df.loc[i,'right'], df.loc[i,'bottom']]
 
 
                         # Transforming images
@@ -208,23 +223,10 @@ class AttentiveObjectDetection(yarp.RFModule):
                          # set up data transformation
                         test_transforms = get_transform()
 
-                        model = ModelSpatial()
-                        model_dict = model.state_dict()
-                        pretrained_dict = torch.load(self.args.model_weights)
-                        pretrained_dict = pretrained_dict['model']
-                        model_dict.update(pretrained_dict)
-                        model.load_state_dict(model_dict)
-
-                        model.cuda()
-                        model.train(False)
-
                         with torch.no_grad():
-                            for i in df.index:
                                 frame_raw = pil_image
                             
                                 width, height = frame_raw.size
-
-                                head_box = [df.loc[i,'left'], df.loc[i,'top'], df.loc[i,'right'], df.loc[i,'bottom']]
 
                                 head = frame_raw.crop((head_box)) # head crop
 
@@ -238,7 +240,7 @@ class AttentiveObjectDetection(yarp.RFModule):
                                 head_channel = head_channel.unsqueeze(0).cuda()
 
                                 # forward pass
-                                raw_hm, _, inout = model(frame, head_channel, head)
+                                raw_hm, _, inout = self.model(frame, head_channel, head)
                                 print("raw_hm has the shape: ", raw_hm.shape)
 
                                 # heatmap modulation
