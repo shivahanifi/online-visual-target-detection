@@ -322,8 +322,8 @@ class AttentiveObjectDetection(yarp.RFModule):
                                         self.out_port_propag_image.write(self.out_buf_propag_image)
                                 else:
                                     print("No contours found: No object visually attended")
-                                    no_object = cv2.putText(np.asarray(frame_raw), 'Non of the objects visually attended.', (10,10), cv2.FONT_HERSHEY_SIMPLEX, 
-                                         0.7, (0, 255, 0), 2, 2)
+                                    no_object = cv2.putText(np.asarray(frame_raw), 'Non of the objects visually attended.', (30,30), cv2.FONT_HERSHEY_SIMPLEX, 
+                                         0.7, (255, 0, 0), 2, 2)
                                     # Connect to the output port 
                                     no_object_array = np.asarray(no_object)
                                     self.out_buf_human_array[:, :] = no_object_array
