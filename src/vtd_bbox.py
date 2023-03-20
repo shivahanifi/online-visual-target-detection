@@ -3,7 +3,6 @@ import cv2
 import json
 import math
 import glob
-import yarp
 import PIL
 import sys
 import io
@@ -197,19 +196,9 @@ class AttentiveObjectDetection(yarp.RFModule):
                 
                     if poses:
                         min_x, min_y, max_x, max_y = get_openpose_bbox(poses)
-                        #head_box = [df.loc[i,'left'], df.loc[i,'top'], df.loc[i,'right'], df.loc[i,'bottom']]
+
+                        # Head bbox extraction
                         head_box = [min_x-(max_x-min_x)*0.1, min_y-(max_y-min_y)*0.1, max_x+(max_x-min_x)*0.1, max_y+(max_y-min_y)*0.1]
-
-                        #column_names = ['left', 'top', 'right', 'bottom']
-                        #line_to_write = [[min_x, min_y, max_x, max_y]]
-                        #df = pd.DataFrame(line_to_write, columns=column_names)
-    
-                        #df['left'] -= (df['right']-df['left'])*0.1
-                        #df['right'] += (df['right']-df['left'])*0.1
-                        #df['top'] -= (df['bottom']-df['top'])*0.1
-                        #df['bottom'] += (df['bottom']-df['top'])*0.1
-                        #head_box = [df.loc[i,'left'], df.loc[i,'top'], df.loc[i,'right'], df.loc[i,'bottom']]
-
 
                         # Transforming images
                         def get_transform():
@@ -220,7 +209,7 @@ class AttentiveObjectDetection(yarp.RFModule):
                             return transforms.Compose(transform_list)
 
 
-                         # set up data transformation
+                        # set up data transformation
                         test_transforms = get_transform()
 
                         with torch.no_grad():
@@ -280,59 +269,75 @@ class AttentiveObjectDetection(yarp.RFModule):
                                     x,y,w,h = cv2.boundingRect(largest_contour)
                                     # Draw the bounding box on the original image
                                     hm_bbox = cv2.rectangle(np.asarray(frame_raw), (x,y), (x+w,y+h), (0,0,255), 2)
-                                else:
-                                    print("No contours found")
 
-                                # Heatmap bbox output
-                                hm_bbox_info = yarp.Bottle()
-                                hm_bbox_info.addInt32(x)
-                                hm_bbox_info.addInt32(y)
-                                hm_bbox_info.addInt32(x+w)
-                                hm_bbox_info.addInt32(y+h)
-                                self.out_port_hm_bbox.write(hm_bbox_info)
+                                    # Heatmap bbox output
+                                    hm_bbox_info = yarp.Bottle()
+                                    hm_bbox_info.addInt32(x)
+                                    hm_bbox_info.addInt32(y)
+                                    hm_bbox_info.addInt32(x+w)
+                                    hm_bbox_info.addInt32(y+h)
+                                    self.out_port_hm_bbox.write(hm_bbox_info)
 
 
-                                # Visualization
-                                # Raw_frame and the bbox
-                                start_point = (int(head_box[0]), int(head_box[1]))
-                                end_point = (int(head_box[2]), int(head_box[3]))
-                                img_bbox = cv2.rectangle(hm_bbox,start_point,end_point, (0, 255, 0),2)
-                                print(img_bbox.shape)                     
-                                
-                                # The arrow mode
-                                if self.args.vis_mode == 'arrow':
-                                    # in-frame gaze
-                                    if inout < self.args.out_threshold: 
-                                        pred_x, pred_y = evaluation.argmax_pts(raw_hm_sq_255)
-                                        norm_p = [pred_x/output_resolution, pred_y/output_resolution]
-                                        circs = cv2.circle(img_bbox, (norm_p[0]*width, norm_p[1]*height),  height/50.0, (35, 225, 35), -1)
-                                        line = cv2.line(circs, (norm_p[0]*width,(head_box[0]+head_box[2])/2), (norm_p[1]*height,(head_box[1]+head_box[3])/2), (255, 0, 0), 2)
+                                    # Visualization
+                                    # Raw_frame and the bbox
+                                    start_point = (int(head_box[0]), int(head_box[1]))
+                                    end_point = (int(head_box[2]), int(head_box[3]))
+                                    img_bbox = cv2.rectangle(hm_bbox,start_point,end_point, (0, 255, 0),2)
+                                    print(img_bbox.shape)                     
+                                    
+                                    # The arrow mode
+                                    if self.args.vis_mode == 'arrow':
+                                        # in-frame gaze
+                                        if inout < self.args.out_threshold: 
+                                            pred_x, pred_y = evaluation.argmax_pts(raw_hm_sq_255)
+                                            norm_p = [pred_x/output_resolution, pred_y/output_resolution]
+                                            circs = cv2.circle(img_bbox, (norm_p[0]*width, norm_p[1]*height),  height/50.0, (35, 225, 35), -1)
+                                            line = cv2.line(circs, (norm_p[0]*width,(head_box[0]+head_box[2])/2), (norm_p[1]*height,(head_box[1]+head_box[3])/2), (255, 0, 0), 2)
 
-                                        line_array =  np.asarray(line)
-                                        self.out_buf_human_array[:, :] = line_array
+                                            line_array =  np.asarray(line)
+                                            self.out_buf_human_array[:, :] = line_array
+                                            self.out_port_human_image.write(self.out_buf_human_image)
+
+                                    # The heatmap mode
+                                    else:
+
+                                        # Convert the norm_map gray scale image to a 3-channel image with the 'jet' colormap
+                                        norm_map = cv2.merge((norm_map,norm_map))
+                                        jet_map = cv2.applyColorMap(norm_map, cv2.COLORMAP_JET)
+
+                                        # Create an alpha channel with a value of 0.2
+                                        alpha = np.ones((norm_map.shape[0], norm_map.shape[1], 1), dtype=np.uint8) * 51
+
+                                        # Stack the jet_map and alpha channels together to create an RGBA image
+                                        rgba_map = np.dstack((jet_map, alpha))
+
+                                        # Display both the bbox and heatmap on the image
+                                        img_blend_bbox = cv2.addWeighted(rgba_map, 0.2,  np.asarray(img_bbox), 0.8, 0, dtype=cv2.CV_8U)
+
+                                        # Connect to the output port
+                                        img_blend_array = np.asarray(img_blend_bbox)
+                                        self.out_buf_human_array[:, :] = img_blend_array
                                         self.out_port_human_image.write(self.out_buf_human_image)
-
-                                # The heatmap mode
+                                        self.out_port_propag_image.write(self.out_buf_propag_image)
                                 else:
-
-                                    # Convert the norm_map gray scale image to a 3-channel image with the 'jet' colormap
-                                    norm_map = cv2.merge((norm_map,norm_map))
-                                    jet_map = cv2.applyColorMap(norm_map, cv2.COLORMAP_JET)
-
-                                    # Create an alpha channel with a value of 0.2
-                                    alpha = np.ones((norm_map.shape[0], norm_map.shape[1], 1), dtype=np.uint8) * 51
-
-                                    # Stack the jet_map and alpha channels together to create an RGBA image
-                                    rgba_map = np.dstack((jet_map, alpha))
-
-                                    # Display both the bbox and heatmap on the image
-                                    img_blend_bbox = cv2.addWeighted(rgba_map, 0.2,  np.asarray(img_bbox), 0.8, 0, dtype=cv2.CV_8U)
-
-                                    # Connect to the output port
-                                    img_blend_array = np.asarray(img_blend_bbox)
-                                    self.out_buf_human_array[:, :] = img_blend_array
+                                    print("No contours found: No object visually attended")
+                                    no_object = cv2.putText(np.asarray(frame_raw), 'Non of the objects visually attended.', (10,10), cv2.FONT_HERSHEY_SIMPLEX, 
+                                         0.7, (0, 255, 0), 2, 2)
+                                    # Connect to the output port 
+                                    no_object_array = np.asarray(no_object)
+                                    self.out_buf_human_array[:, :] = no_object_array
                                     self.out_port_human_image.write(self.out_buf_human_image)
                                     self.out_port_propag_image.write(self.out_buf_propag_image)
+
+                                    # Heatmap bbox from previous frame
+                                    #hm_bbox_data = yarp.Bottle()
+                                    #hm_bbox_data.clear()
+                                    #hm_bbox_data = self.in_port_hm_bbox_data.read()
+                                    #hm_bbox_data_list = []
+                                    #for i in range(hm_bbox_data.size()):
+                                    #    hm_bbox_data_list.append(hm_bbox_data.get(i).asFloat32())
+                                    #self.out_port_hm_bbox.write(hm_bbox_info)
 
                 except Exception as err:
                     print("Unexpected error!!! " + str(err))

@@ -45,14 +45,14 @@
 		<protocol>mjpeg</protocol>
 	</connection>
 
-    <!-- raw image to input -->
+    <!-- raw image to vtd input -->
 	<connection>
 		<from>/yarpOpenPose/propag:o</from>
 		<to>/vtd_bbox/image:i</to>
 		<protocol>mjpeg</protocol>
 	</connection>
 
-	<!-- yarpopenpose data to input -->
+	<!-- yarpopenpose data to vtd input -->
     <connection>
 		<from>/yarpOpenPose/target:o</from>
 		<to>/vtd_bbox/data:i</to>
@@ -60,7 +60,7 @@
 	</connection>
 
 
-    <!-- visualize bbox -->
+    <!-- visualize outputbbox -->
 	<connection>
 		<from>/vtd_bbox/image:o</from>
 		<to>/view/bbox</to>
