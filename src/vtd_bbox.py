@@ -245,7 +245,7 @@ class AttentiveObjectDetection(yarp.RFModule):
 
                                 # Heatmap bbox extraction
                                 # Heatmap binary thresholding
-                                ret, thresh_hm = cv2.threshold(norm_map, 200, 255, cv2.THRESH_BINARY)
+                                ret, thresh_hm = cv2.threshold(norm_map, 140, 255, cv2.THRESH_BINARY)
                                 print("thresh_hm has the shape ", thresh_hm.shape, "and the type ", thresh_hm.dtype)
 
                                 # Thresholded heatmap contour extraction
