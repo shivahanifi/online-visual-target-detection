@@ -20,7 +20,7 @@ from torchvision import datasets, transforms
 from PIL import Image
 from PIL import ImageShow
 from scipy.misc import imresize
-from model import ModelSpatial
+from model import ModelSpatial, ModelSpatioTemporal
 from utils import imutils, evaluation
 from config import *
 from functions.config_vt import *
@@ -107,22 +107,24 @@ class AttentiveObjectDetection(yarp.RFModule):
 
         # To get argumennts needed
         parser = argparse.ArgumentParser()
-        parser.add_argument('--model_weights', type=str, help='model weights', default='/projects/online-visual-target-detection/model_demo.pt')
+        parser.add_argument('--model_weights', type=str, help='model weights', default='/projects/online-visual-target-detection/epoch_08_weights.pt')
         parser.add_argument('--vis_mode', type=str, help='heatmap or arrow', default='heatmap')
         parser.add_argument('--out_threshold', type=int, help='out-of-frame target dicision threshold', default=100)
         self.args = parser.parse_args()
 
 
         # Load model 
-        self.model = ModelSpatial()
+        self.model = ModelSpatioTemporal(num_lstm_layers=2)
+#        self.model = nn.DataParallel(self.model)
         model_dict = self.model.state_dict()
-        pretrained_dict = torch.load(self.args.model_weights)
+        pretrained_dict = torch.load(self.args.model_weights, map_location='cuda:0')
         pretrained_dict = pretrained_dict['model']
         model_dict.update(pretrained_dict)
-        self.model.load_state_dict(model_dict)
+        self.model.load_state_dict(pretrained_dict)
 
         self.model.cuda()
         self.model.train(False)
+        print("Model loaded")
 
         return True
     
@@ -191,7 +193,7 @@ class AttentiveObjectDetection(yarp.RFModule):
         if pil_image:
             received_data = self.in_port_human_data.read()
             if received_data:
-                try:
+#                try:
                     poses, conf_poses, faces, conf_faces = read_openpose_data(received_data)
                 
                     if poses:
@@ -339,8 +341,8 @@ class AttentiveObjectDetection(yarp.RFModule):
                                     #    hm_bbox_data_list.append(hm_bbox_data.get(i).asFloat32())
                                     #self.out_port_hm_bbox.write(hm_bbox_info)
 
-                except Exception as err:
-                    print("Unexpected error!!! " + str(err))
+#                except Exception as err:
+#                    print("Unexpected error!!! " + str(err))
         return True                  
 
 if __name__ == '__main__':
